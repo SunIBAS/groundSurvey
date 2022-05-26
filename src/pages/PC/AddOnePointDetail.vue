@@ -1,0 +1,335 @@
+<template>
+	<div>
+		<el-dialog
+			title="填写信息"
+			:visible.sync="dialogVisible"
+			:fullscreen="true">
+			<el-form ref="form" :model="form" label-width="120px">
+				<el-form-item label="坐标">
+					<el-row :gutter="20" style="margin: auto 0px !important;">
+						<el-col :span="4" style="text-align: center;">lat</el-col>
+						<el-col :span="8">
+							<el-input v-model="form.latlng.lat"></el-input>
+						</el-col>
+						<el-col :span="4" style="text-align: center;">lng</el-col>
+						<el-col :span="8">
+							<el-input v-model="form.latlng.lng"></el-input>
+						</el-col>
+					</el-row>
+				</el-form-item>
+				<el-form-item label="土地类型">
+					<el-row :gutter="20" style="margin: auto 0px !important;">
+						<el-col :span="18">
+							<div class="form-select-result" @click="classesDialogVisible=true">
+								<span v-show="selection.type==='classes'">请选择</span>
+								<div v-show="selection.type==='detail'" style="display: flex;flex-direction: column;">
+									<el-breadcrumb separator="/" style="width: 100%;">
+										<el-breadcrumb-item v-for="(so) in selectedOption" :key="so.label">
+											<el-button type="text">{{so.label}}</el-button>
+										</el-breadcrumb-item>
+									</el-breadcrumb>
+									<div>
+										<el-tag v-for="(obj,ind) in form.plantType" type="success" :key="ind" style="margin-right: 4px;">
+											{{selection.content[ind].label}}：{{obj.label ? obj.label : '/'}}
+										</el-tag>
+									</div>
+								</div>
+							</div>
+						</el-col>
+						<el-col :span="6">
+							<el-button style="width: 100%">历史选项</el-button>
+						</el-col>
+					</el-row>
+				</el-form-item>
+				<el-form-item label="虫害情况">
+					<el-row :gutter="20" style="margin: auto 0px !important;">
+						<el-col :span="18">
+							<el-button style="width: 100%;">请选择</el-button>
+						</el-col>
+						<el-col :span="6">
+							<el-button style="width: 100%">历史选项</el-button>
+						</el-col>
+					</el-row>
+				</el-form-item>
+				<el-form-item label="备注">
+					<el-input style="padding: 0 10px;" type="textarea" v-model="form.info"></el-input>
+				</el-form-item>
+				<el-form-item label="图片">
+					<el-upload
+						class="avatar-uploader"
+						:auto-upload="false"
+						action=""
+						:show-file-list="false"
+						:on-change="handleAvatarSuccess">
+						<img style="padding: 0 10px;" v-if="form.imageUrl" :src="form.imageUrl" class="avatar">
+						<i style="padding: 0 10px;" v-else class="el-icon-plus avatar-uploader-icon"></i>
+					</el-upload>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" @click="onSubmit">立即创建</el-button>
+					<el-button>取消</el-button>
+				</el-form-item>
+			</el-form>
+		</el-dialog>
+		<el-dialog
+			:close-on-click-modal="false"
+			:append-to-body="true"
+			width="80%"
+			custom-class="classesDialog"
+			:visible.sync="classesDialogVisible"
+			:title="null">
+			<div style="width: 100%;height: 100%;display: flex;flex-direction: column">
+				<div class="classesDialogBreadCrumb">
+					<el-breadcrumb separator="/" style="width: 100%;">
+						<el-breadcrumb-item v-for="(so,ind) in selectedOption" :key="so.label">
+							<el-button type="text" @click="reselect(ind)">{{so.label}}</el-button>
+						</el-breadcrumb-item>
+					</el-breadcrumb>
+					<el-button type="text" v-show="selection.type === 'detail'" style="font-size: 16px;color: #2196f3"
+							   @click="classesDialogVisible=false">提交</el-button>
+				</div>
+				<div v-if="selection.type === 'classes'">
+					<el-row :gutter="20">
+						<template v-for="(opt,ind) in selection.content">
+							<el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1" :key="ind">
+								<el-button type="text" @click="getCurrentMenus(opt,ind)">{{opt.label}}</el-button>
+							</el-col>
+						</template>
+					</el-row>
+				</div>
+				<div v-else-if="selection.type === 'detail'">
+					<div v-for="(formOpt,ind) in selection.content" :key="ind">
+						<el-divider content-position="left">{{formOpt.label}}</el-divider>
+						<el-row :gutter="20">
+							<el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1"
+									v-for="(opt,oind) in formOpt.options"
+									:key="oind">
+								<div v-if="opt.type === 'add'">
+									<el-button @click="addNewSelection(opt,oind,ind)" type="text">+{{opt.label}}</el-button>
+								</div>
+								<div v-else>
+									<el-button type="text" @click="addSelection(opt,oind,ind)">{{opt.label}}</el-button>
+									<i class="el-icon-check" v-show="form.plantType[ind].ind === oind"></i>
+								</div>
+							</el-col>
+						</el-row>
+					</div>
+				</div>
+			</div>
+		</el-dialog>
+	</div>
+</template>
+
+<script>
+import {
+	getMenus
+} from "../../api/selection";
+import {
+	classesMenuXForm
+} from "../../utils/classesMenuXForm";
+
+let _classesMenuXForm = null;
+let menus = [];
+export default {
+	name: "AddOnePointDetail",
+	data() {
+		return {
+			classesDialogVisible: false,
+			dialogVisible: false,
+			form: {
+				// name: '',
+				// region: '',
+				// date1: '',
+				// date2: '',
+				// delivery: false,
+				// type: [],
+				// resource: '',
+				latlng: {
+					lat: 0,
+					lng: 0,
+				},	// 经纬度
+				info: '',	// 备注
+				imageUrl: '',	// 图像
+				plantType: [],	// 土地类型情况
+			},
+			selection: {
+				type: 'classes', // classes 类别  detail 一个类别下的详细选项
+				content: []
+			},
+			// 已经选择的内容（面包屑，和定位）
+			selectedOption: [
+				{ id: -1,label: '选择' },
+			]
+		}
+	},
+	methods: {
+		onSubmit() {},
+		handleAvatarSuccess(file, fileList) {
+			// alert('123');
+			console.log(fileList.length);
+			this.form.imageUrl = URL.createObjectURL(file.raw);
+			console.log(this.form.imageUrl);
+		},
+		// 从大类中获取下一个细分类的菜单
+		getCurrentMenus(opt,ind) {
+			this.selectedOption.push({
+				id: opt.id,
+				ind: ind,
+				label: this.selection.content[ind].label
+			});
+			if (this.selection.content[ind].children) {
+				this.selection = {
+					type: 'classes',
+					content: this.selection.content[ind].children
+				}
+			} else {
+				this.form.plantType = this.selection.content[ind].form.map(() => {
+					return {
+						id: '',
+						ind: -1,
+						label: ''
+					}
+				});
+				this.selection = {
+					type: 'detail',
+					content: this.selection.content[ind].form
+				}
+			}
+		},
+		// ind => (this.selectedOption).index
+		reselect(ind) {
+			if (ind === 0) {
+				this.form.plantType = [];
+				this.selection.type = 'classes';
+				this.selection.content = menus;
+				this.selectedOption = [{id:-1,label: '选择'}];
+			} else {
+				this.form.plantType = [];
+				let tmp = this.selectedOption.slice(1,ind);
+				this.selection.type = 'classes';
+				this.selection.content = menus;
+				this.selectedOption = [{id:-1,label: '选择'}];
+				tmp.forEach(t => this.getCurrentMenus(t.ind));
+			}
+		},
+		// 最后一级选择，点击后添加到选项列表中
+		addSelection(opt,oind,ind) {
+			this.$set(this.form.plantType,ind, {
+				id: opt.id,
+				ind: oind,
+				label: opt.label
+			});
+		},
+		addNewSelection(opt,oind,ind) {
+			this.$prompt(opt.label, '添加', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+			}).then(({ value }) => {
+				this.$message({
+					type: 'success',
+					message: '新增内容: ' + value + ind
+				});
+				let m = menus;
+				this.selectedOption.slice(1).forEach(i => {
+					if (m[i.ind].children) {
+						m = m[i.ind].children;
+					} else {
+						m = m[i.ind];
+					}
+				});
+				m.form[ind].options.unshift({
+					id: `id_${new Date().getTime()}`,
+					label: value,
+				})
+			});
+		},
+		setFormData(obj) {
+			// obj = {
+			// 	"lat": 43.962179139526434,
+			// 	"lng": 89.54818725585939,
+			// 	"info": "123",
+			// 	"imageUrl": "",
+			// 	"plantType": [
+			// 		"莲藕",
+			// 		"平原"
+			// 	]
+			// }
+			let ret = _classesMenuXForm.menus2Form(obj.plantType);
+			this.form.latlng.lat = obj.lat;
+			this.form.latlng.lng = obj.lng;
+			this.form.imageUrl = obj.imageUrl;
+			this.form.info = obj.info;
+			this.form.plantType.splice(0,this.form.plantType.length,ret.plantType);
+			this.selectedOption.splice(0,this.selectedOption.length,ret.selectedOption);
+			this.selectedOption.unshift({
+				id: -1,
+				label: '选择'
+			})
+			this.selection.content.splice(0,this.selection.content.length,ret.selection.content);
+			this.selection.type = ret.selection.type;
+		},
+		buildFormData() {
+			let obj = {
+				lat: this.form.latlng.lat,
+				lng: this.form.latlng.lng,
+				info: this.form.info,
+				imageUrl: this.form.imageUrl,
+				plantType: this.form.plantType.map(_ => _.id).filter(_=>_)
+			};
+			return obj;
+		},
+		// beforeAvatarUpload(file) {
+		// 	const isJPG = file.type === 'image/jpeg';
+		// 	const isLt2M = file.size / 1024 / 1024 < 2;
+		//
+		// 	if (!isJPG) {
+		// 		this.$message.error('上传头像图片只能是 JPG 格式!');
+		// 	}
+		// 	if (!isLt2M) {
+		// 		this.$message.error('上传头像图片大小不能超过 2MB!');
+		// 	}
+		// 	return isJPG && isLt2M;
+		// }
+	},
+	watch: {
+		dialogVisible() {
+			this.reselect(0);
+		}
+	},
+	mounted() {
+		getMenus().then(_menus=>{
+			menus = _menus;
+			_classesMenuXForm = classesMenuXForm(menus);
+		});
+		window.$aopd = this;
+	}
+}
+</script>
+
+<style>
+	.avatar {
+		width: 500px;
+		max-width: 50%;
+	}
+	.avatar-uploader .el-upload--text {
+		text-align: left;
+	}
+	.classesDialogBreadCrumb {
+		display: flex;
+		width: 100%;
+		height: 40px;
+		line-height: 40px;
+		font-size: 18px;
+		margin-bottom: 10px;
+	}
+	.classesDialog .el-dialog__header {
+		display: none !important;
+	}
+	.form-select-result {
+		width: 100%;
+		border: 1px solid #dcdfe6;
+		padding: 5px 10px;
+		border-radius: 4px;
+		box-sizing: border-box;
+	}
+</style>

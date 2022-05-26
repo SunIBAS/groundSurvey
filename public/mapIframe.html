@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./js/leaflet_1.7.1/leaflet.css">
+    <link rel="stylesheet" href="./css/leaflet-custrom.css">
+    <link rel="stylesheet" href="./js/leaflet-beautify-marker/leaflet-beautify-marker-icon.css">
+    <link rel="stylesheet" href="./css/FontAwesome@4.5.0/FontAwesome.css">
+    <script src="./js/leaflet_1.7.1/leaflet.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script src="./js/esri-leaflet@3.0.8.js"></script>
+    <script src="./js/leafletAPI.js"></script>
+    <script src="./js/leaflet-beautify-marker/leaflet-beautify-marker-icon.js"></script>
+    <style>
+        body {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+        @supports (-webkit-touch-callout: none) {
+            #map {
+                min-height: -webkit-fill-available;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    window.map = null;
+    // https://account.mapbox.com/access-tokens
+    window.onload = function () {
+        leafletAPI.initMap(L,'map',[43.83593960164886, 89.83942252842337],10);
+        leafletAPI.changeBaseMap('arcgis');
+        window.map = leafletAPI.get_map();
+        window.leafletAPI = leafletAPI;
+    }
+</script>
+</body>
+</html>

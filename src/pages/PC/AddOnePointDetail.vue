@@ -66,8 +66,7 @@
 					</el-upload>
 				</el-form-item>
 				<el-form-item>
-					<el-button type="primary" @click="onSubmit">立即创建</el-button>
-					<el-button>取消</el-button>
+					<el-button style="width: 100%;" type="primary" @click="onSubmit">立即创建</el-button>
 				</el-form-item>
 			</el-form>
 		</el-dialog>
@@ -86,7 +85,7 @@
 						</el-breadcrumb-item>
 					</el-breadcrumb>
 					<el-button type="text" v-show="selection.type === 'detail'" style="font-size: 16px;color: #2196f3"
-							   @click="classesDialogVisible=false">提交</el-button>
+							   @click="classesDialogVisible=false">确定</el-button>
 				</div>
 				<div v-if="selection.type === 'classes'">
 					<el-row :gutter="20">
@@ -100,19 +99,17 @@
 				<div v-else-if="selection.type === 'detail'">
 					<div v-for="(formOpt,ind) in selection.content" :key="ind">
 						<el-divider content-position="left">{{formOpt.label}}</el-divider>
-						<el-row :gutter="20">
-							<el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1"
-									v-for="(opt,oind) in formOpt.options"
-									:key="oind">
-								<div v-if="opt.type === 'add'">
-									<el-button @click="addNewSelection(opt,oind,ind)" type="text">+{{opt.label}}</el-button>
-								</div>
-								<div v-else>
-									<el-button type="text" @click="addSelection(opt,oind,ind)">{{opt.label}}</el-button>
-									<i class="el-icon-check" v-show="form.plantType[ind].ind === oind"></i>
-								</div>
-							</el-col>
-						</el-row>
+						<div class="option-div"
+							 v-for="(opt,oind) in formOpt.options"
+							 :key="oind">
+							<div v-if="opt.type === 'add'">
+								<el-button @click="addNewSelection(opt,oind,ind)" type="text">+{{opt.label}}</el-button>
+							</div>
+							<div v-else>
+								<el-button type="text" @click="addSelection(opt,oind,ind)">{{opt.label}}</el-button>
+								<i class="el-icon-check" v-show="form.plantType[ind].ind === oind"></i>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -331,5 +328,10 @@ export default {
 		padding: 5px 10px;
 		border-radius: 4px;
 		box-sizing: border-box;
+	}
+	.option-div {
+		display: inline-block;
+		margin-right: 10px !important;
+		padding: 0 5px;
 	}
 </style>

@@ -1,24 +1,11 @@
 # ground_survey_1
 
-## Project setup
-```
-npm install
-```
+#### 页面流程
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+- 1 进入 EmptyApp 确定是否已经登录
 
-### Compiles and minifies for production
-```
-npm run build
-```
+- 1.1 已经登录，进入 App
 
-### Lints and fixes files
-```
-npm run lint
-```
+- 1.2 未登录，进入 User\Login 或 User\Register，注册登录之后 App
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- 2 在 App 中判断页面类型，如果是 pc 进入 PC\PCIndex，手机 进入 Mobile\MobileIndex

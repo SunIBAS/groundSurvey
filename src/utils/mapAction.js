@@ -1,3 +1,6 @@
+// const createMarkerByLatLng = (lat,lng) => {
+//     return leafletAPI.addMarker([lat,lng]);
+// };
 const addMarker = function ($this) {
     let leafletAPI = $this.$addin.$leafletAPI;
     let cb = ()=>null;

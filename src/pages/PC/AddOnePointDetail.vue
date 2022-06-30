@@ -4,7 +4,7 @@
 			title="填写信息"
 			:visible.sync="dialogVisible"
 			:fullscreen="true">
-			<el-form ref="form" :model="form" label-width="120px">
+			<el-form ref="form" :model="form" label-width="120px" label-position="top">
 				<el-form-item label="坐标">
 					<el-row :gutter="20" style="margin: auto 0px !important;">
 						<el-col :span="4" style="text-align: center;">lat</el-col>
@@ -19,7 +19,7 @@
 				</el-form-item>
 				<el-form-item label="土地类型">
 					<el-row :gutter="20" style="margin: auto 0px !important;">
-						<el-col :span="18">
+<!--						<el-col :span="18">-->
 							<div class="form-select-result" @click="classesDialogVisible=true">
 								<span v-show="selection.type==='classes'">请选择</span>
 								<div v-show="selection.type==='detail'" style="display: flex;flex-direction: column;">
@@ -35,20 +35,20 @@
 									</div>
 								</div>
 							</div>
-						</el-col>
-						<el-col :span="6">
-							<el-button style="width: 100%">历史选项</el-button>
-						</el-col>
+<!--						</el-col>-->
+<!--						<el-col :span="6">-->
+<!--							<el-button style="width: 100%">历史选项</el-button>-->
+<!--						</el-col>-->
 					</el-row>
 				</el-form-item>
 				<el-form-item label="虫害情况">
 					<el-row :gutter="20" style="margin: auto 0px !important;">
-						<el-col :span="18">
+<!--						<el-col :span="18">-->
 							<el-button style="width: 100%;">请选择</el-button>
-						</el-col>
-						<el-col :span="6">
-							<el-button style="width: 100%">历史选项</el-button>
-						</el-col>
+<!--						</el-col>-->
+<!--						<el-col :span="6">-->
+<!--							<el-button style="width: 100%">历史选项</el-button>-->
+<!--						</el-col>-->
 					</el-row>
 				</el-form-item>
 				<el-form-item label="备注">
@@ -88,13 +88,13 @@
 							   @click="classesDialogVisible=false">确定</el-button>
 				</div>
 				<div v-if="selection.type === 'classes'">
-					<el-row :gutter="20">
+					<div>
 						<template v-for="(opt,ind) in selection.content">
-							<el-col :xs="8" :sm="6" :md="4" :lg="3" :xl="1" :key="ind">
-								<el-button type="text" @click="getCurrentMenus(opt,ind)">{{opt.label}}</el-button>
-							</el-col>
+							<div :key="ind" style="min-width: 25%;margin-right: 5px;float:left;margin-bottom: 5px;">
+								<el-tag @click="getCurrentMenus(opt,ind)">{{opt.label}}</el-tag>
+							</div>
 						</template>
-					</el-row>
+					</div>
 				</div>
 				<div v-else-if="selection.type === 'detail'">
 					<div v-for="(formOpt,ind) in selection.content" :key="ind">
@@ -119,11 +119,16 @@
 
 <script>
 import {
-	getMenus
+	getMenus,
+	getForm
 } from "../../api/selection";
 import {
 	classesMenuXForm
 } from "../../utils/classesMenuXForm";
+import {
+	rebuildMenus,
+	rebuildForm
+} from "../../utils/rebuildMenus";
 
 let _classesMenuXForm = null;
 let menus = [];
@@ -134,13 +139,6 @@ export default {
 			classesDialogVisible: false,
 			dialogVisible: false,
 			form: {
-				// name: '',
-				// region: '',
-				// date1: '',
-				// date2: '',
-				// delivery: false,
-				// type: [],
-				// resource: '',
 				latlng: {
 					lat: 0,
 					lng: 0,
@@ -180,17 +178,31 @@ export default {
 					content: this.selection.content[ind].children
 				}
 			} else {
-				this.form.plantType = this.selection.content[ind].form.map(() => {
-					return {
-						id: '',
-						ind: -1,
-						label: ''
+				getForm(this.selection.content[ind].id).then(f => rebuildForm(f,this.$lang.$lang_type))
+				.then(form => {
+					this.form.plantType = form.map(() => {
+						return {
+							id: '',
+							ind: -1,
+							label: '',
+						}
+					})
+					this.selection = {
+						type: 'detail',
+						content: form
 					}
 				});
-				this.selection = {
-					type: 'detail',
-					content: this.selection.content[ind].form
-				}
+				// this.form.plantType = this.selection.content[ind].form.map(() => {
+				// 	return {
+				// 		id: '',
+				// 		ind: -1,
+				// 		label: ''
+				// 	}
+				// });
+				// this.selection = {
+				// 	type: 'detail',
+				// 	content: this.selection.content[ind].form
+				// }
 			}
 		},
 		// ind => (this.selectedOption).index
@@ -295,7 +307,7 @@ export default {
 	},
 	mounted() {
 		getMenus().then(_menus=>{
-			menus = _menus;
+			menus = rebuildMenus(_menus,this.$lang.$lang_type);
 			_classesMenuXForm = classesMenuXForm(menus);
 		});
 		window.$aopd = this;

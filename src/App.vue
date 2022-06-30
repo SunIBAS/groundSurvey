@@ -7,19 +7,19 @@
 </template>
 
 <script>
-import {
-	OS,
-	checkOS
-} from "./utils/checkOS";
+// import {
+// 	OS,
+// 	checkOS
+// } from "./utils/checkOS";
 import PCIndex from "./pages/PC/PCIndex";
-import MobilIndex from "./pages/Mobile/MobilIndex";
+// import MobilIndex from "./pages/Mobile/MobilIndex";
 
 let ifr = null;
 export default {
 	name: 'App',
 	components: {
 		PCIndex,
-		MobilIndex
+		// MobilIndex
 	},
 	data() {
 		return {
@@ -54,20 +54,20 @@ export default {
 				// this.$map = ifr.contentWindow.map;
 				// this.$leafletAPI = ifr.contentWindow.leafletAPI;
 				this.pageName = 'PCIndex';
-				checkOS().then(osName => {
-					switch (osName) {
-						case OS.PC:
-							// this.pageName = 'PCIndex';
-							break;
-						case OS.Android:
-						case OS.Apple:
-							// this.pageName = 'MobilIndex';
-							break;
-						default:
-							this.pageName = 'PCIndex';
-
-					}
-				})
+				// checkOS().then(osName => {
+				// 	switch (osName) {
+				// 		case OS.PC:
+				// 			// this.pageName = 'PCIndex';
+				// 			break;
+				// 		case OS.Android:
+				// 		case OS.Apple:
+				// 			// this.pageName = 'MobilIndex';
+				// 			break;
+				// 		default:
+				// 			this.pageName = 'PCIndex';
+				//
+				// 	}
+				// })
 			}
 		},500);
 		window.$this = this;

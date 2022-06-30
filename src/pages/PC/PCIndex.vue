@@ -1,40 +1,15 @@
 <template>
 	<div>
 		<AddOnePointDetail ref="aopd"></AddOnePointDetail>
-		<el-dialog
-			custom-class="basemap-dialog"
-			title="更换底图"
-			:visible.sync="dialogBasemapVisible"
-			width="50%">
-			<el-row :gutter="20">
-				<template v-for="bm in basemap">
-					<el-col :span="12" :key="bm.key" style="margin-top: 10px;margin-bottom: 10px;padding-top: 10px;">
-						<div style="">
-							<div class="basemap-shadow" @click="changeBaseMap(bm.key)">
-								<div v-show="bm.key === basemapkey" style="width: 100%;height: 100%;background: rgba(0,0,0,0.1);text-align: center;">
-									<i style="line-height: 260px;color: #50a6ff;font-size: 80px;" class="el-icon-check"></i>
-								</div>
-							</div>
-							<div style="padding: 10px;display: flex;flex-direction: column;">
-								<img :src="`./basemap-image/${bm.key}.png`" alt="" width="200" height="200" style="margin: auto;">
-								<el-button type="text" style="width: 100%;">
-									{{bm.name}}
-								</el-button>
-							</div>
-						</div>
-					</el-col>
-				</template>
-			</el-row>
-		</el-dialog>
+		<!-- 修改底图 -->
+		<ChangeMap ref="cmap"></ChangeMap>
 		<div class="top-center" v-show="marker_click">
 			<el-button type="text" @click="addOnePointDetail">添加地点</el-button>
 			<i class="el-icon-close" style="line-height: 40px;float: right;padding-right: 5px;" @click="removeMarker"></i>
 		</div>
-		<div class="left-bottom" :style="{backgroundImage: `url(./basemap-image/${basemapkey}.png)`}" @click="dialogBasemapVisible=true">
-		</div>
-		<div class="right-bottom" @click="()=>{}">
-			<!--退出登录-->
-			<i class="el-icon-close"></i>
+		<div class="right-bottom" @click="toCurrentLocation">
+			<!--转到当前位置-->
+			<i class="el-icon-map-location"></i>
 		</div>
 		<div class="right-top" @click="()=>{}">
 			<!--历史列表-->
@@ -48,6 +23,10 @@ import AddOnePointDetail from "./AddOnePointDetail";
 import {
 	addMarker
 } from "../../utils/mapAction";
+import ChangeMap from "./ChangeMap";
+import {
+	getPosition
+} from './../../utils/getGeoLocation'
 
 let marker = null;
 let latlng = null;
@@ -56,12 +35,9 @@ export default {
 	props: {
 		ifr: {}
 	},
-	components: {AddOnePointDetail},
+	components: {ChangeMap, AddOnePointDetail},
 	data() {
 		return {
-			dialogBasemapVisible: false,
-			basemap: [],
-			basemapkey: null,
 			marker_click: false,
 		}
 	},
@@ -88,28 +64,29 @@ export default {
 				this.marker_click = true;
 			}
 		},
-		changeBaseMap(key) {
-			if (key === this.basemapkey) {
-				return;
-			}
-			this.$addin.$leafletAPI.changeBaseMap(key);
-			this.basemapkey = key;
+		toCurrentLocation() {
+			this.removeMarker();
+			getPosition().then(p => {
+				console.log(p);
+				// this.$message(JSON.stringify(p));
+				let zoom = this.$addin.$leafletAPI.get_map().getZoom();
+				zoom = zoom > 15 ? zoom : 15;
+				this.$addin.$leafletAPI.get_map().flyTo([p.lat,p.lng],zoom);
+				this.addOnePoint('after',this.$addin.$leafletAPI.addMarker([p.lat,p.lng]),p);
+			}).catch(e => {
+				this.$message(e);
+			})
 		}
 	},
 	mounted() {
 		window.$pc = this;
 		console.log(this.$addin.$leafletAPI);
-		this.basemap = this.$addin.$leafletAPI.get_basemap();
-		this.basemapkey = this.$addin.$leafletAPI.get_current_basemap_key();
 		addMarker(this)(this.addOnePoint.bind(this));
 	}
 }
 </script>
 
 <style>
-.basemap-dialog {
-	min-width: 500px !important;
-}
 .addPointAction {
 	position: fixed;
 	bottom: 0px;
@@ -144,13 +121,13 @@ export default {
 	cursor: pointer;
 }
 .right-bottom {
-	line-height: 40px;
+	line-height: 60px;
 	text-align: center;
 	position: fixed;
 	right: 10px;
 	bottom: 20px;
-	width: 40px;
-	height: 40px;
+	width: 60px;
+	height: 60px;
 	background: white;
 	border-radius: 60px;
 	border: 2px solid white;
@@ -170,10 +147,5 @@ export default {
 	border: 2px solid white;
 	background-size: 100%;
 	cursor: pointer;
-}
-.basemap-shadow {
-	position: absolute;
-	height: 260px;
-	width: calc(50% - 20px);
 }
 </style>

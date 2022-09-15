@@ -38,7 +38,7 @@
     // https://account.mapbox.com/access-tokens
     window.onload = function () {
         leafletAPI.initMap(L,'map',[43.83593960164886, 89.83942252842337],10);
-        leafletAPI.changeBaseMap('arcgis');
+        leafletAPI.changeBaseMap('mapbox');
         window.map = leafletAPI.get_map();
         window.leafletAPI = leafletAPI;
     }

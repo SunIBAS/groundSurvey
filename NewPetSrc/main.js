@@ -3,7 +3,7 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 // import App from './App.vue';
 import EmptyApp from "./EmptyApp";
-// import EmptyApp from "./pages/PC/RecordList";
+// import EmptyApp from "./pages/AddOnePointDetail";
 // import EmptyApp from "../src/pages/PC/Records/SoilMoistureCollRecord";
 import {Lang} from "./utils/Lang";
 

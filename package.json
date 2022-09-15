@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build && node update.js",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -37,7 +37,8 @@
       "parser": "babel-eslint"
     },
     "rules": {
-      "no-mixed-spaces-and-tabs": 0
+      "no-mixed-spaces-and-tabs": 0,
+      "no-debugger": "off"
     }
   },
   "browserslist": [

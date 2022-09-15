@@ -1,0 +1,215 @@
+<template>
+	<div>
+		<el-dialog
+			title="填写信息"
+			:visible.sync="dialogVisible"
+			:fullscreen="true">
+			<el-form ref="form" :model="form" label-width="120px" label-position="top">
+				<el-form-item label="坐标">
+					<el-row :gutter="20" style="margin: auto 0px !important;">
+						<el-col :span="4" style="text-align: center;">lat</el-col>
+						<el-col :span="8">
+							<el-input v-model="form.latlng.lat"></el-input>
+						</el-col>
+						<el-col :span="4" style="text-align: center;">lng</el-col>
+						<el-col :span="8">
+							<el-input v-model="form.latlng.lng"></el-input>
+						</el-col>
+					</el-row>
+				</el-form-item>
+				<el-form-item label="土地类型">
+					<el-row :gutter="20" style="margin: auto 0px !important;">
+<!--						<el-col :span="18">-->
+							<div class="form-select-result">
+								<el-button style="width: 100%;" @click="openSelection(constType.landtype)">请选择</el-button>
+<!--								<div v-show="dialog.type==='detail'" style="display: flex;flex-direction: column;">-->
+<!--									<el-breadcrumb separator="/" style="width: 100%;">-->
+<!--										<el-breadcrumb-item v-for="(so) in selectedOption" :key="so.label">-->
+<!--											<el-button type="text">{{so.label}}</el-button>-->
+<!--										</el-breadcrumb-item>-->
+<!--									</el-breadcrumb>-->
+<!--									<div>-->
+<!--										<el-tag v-for="(obj,ind) in form.plantType" type="success" :key="ind" style="margin-right: 4px;">-->
+<!--											{{selection.content[ind].label}}：{{obj.label ? obj.label : '/'}}-->
+<!--										</el-tag>-->
+<!--									</div>-->
+<!--								</div>-->
+							</div>
+<!--						</el-col>-->
+<!--						<el-col :span="6">-->
+<!--							<el-button style="width: 100%">历史选项</el-button>-->
+<!--						</el-col>-->
+					</el-row>
+				</el-form-item>
+				<el-form-item label="虫害情况">
+					<el-row :gutter="20" style="margin: auto 0px !important;">
+<!--						<el-col :span="18">-->
+							<el-button style="width: 100%;">请选择</el-button>
+<!--						</el-col>-->
+<!--						<el-col :span="6">-->
+<!--							<el-button style="width: 100%">历史选项</el-button>-->
+<!--						</el-col>-->
+					</el-row>
+				</el-form-item>
+				<el-form-item label="备注">
+					<el-input style="padding: 0 10px;" type="textarea" v-model="form.info"></el-input>
+				</el-form-item>
+				<el-form-item label="图片">
+					<el-upload
+						class="avatar-uploader"
+						:auto-upload="false"
+						action=""
+						:show-file-list="false"
+						:on-change="handleAvatarSuccess">
+						<img style="padding: 0 10px;" v-if="form.imageUrl" :src="form.imageUrl" class="avatar">
+						<i style="padding: 0 10px;" v-else class="el-icon-plus avatar-uploader-icon"></i>
+					</el-upload>
+				</el-form-item>
+				<el-form-item>
+					<el-button style="width: 100%;">病害系统调查表</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button style="width: 100%;">病害样本采集</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button style="width: 100%;">虫害采集</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button style="width: 100%;">机地病害采样表</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button style="width: 100%;">机地虫害调查表</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button style="width: 100%;">土壤湿度采集</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button style="width: 100%;color: red;">作物(小麦)产量采集</el-button>
+				</el-form-item>
+				<el-form-item>
+					<el-button style="width: 100%;" type="primary" @click="onSubmit">立即创建</el-button>
+				</el-form-item>
+			</el-form>
+		</el-dialog>
+		<el-dialog
+			:close-on-click-modal="false"
+			:append-to-body="true"
+			width="80%"
+			custom-class="classesDialog"
+			:visible.sync="dialog.visible"
+			:title="null">
+			<div style="width: 100%;height: 100%;display: flex;flex-direction: column">
+<!--				<div class="classesDialogBreadCrumb">-->
+<!--					<el-breadcrumb separator="/" style="width: 100%;">-->
+<!--						<el-breadcrumb-item v-for="(so,ind) in selectedOption" :key="so.label">-->
+<!--							<el-button type="text" @click="reselect(ind)">{{so.label}}</el-button>-->
+<!--						</el-breadcrumb-item>-->
+<!--					</el-breadcrumb>-->
+<!--					<el-button type="text" v-show="dialog.type === 'detail'" style="font-size: 16px;color: #2196f3"-->
+<!--							   @click="classesDialogVisible=false">确定</el-button>-->
+<!--				</div>-->
+				<div v-show="dialog.step === constStep.classes">
+					<div v-show="dialog.type === constType.landtype" style="display: flex;flex-direction: column;">
+						<div :key="ind" v-for="(lt,ind) in dialog.classes">
+							<el-divider content-position="left">{{lt['name' + $lang.$lang_type]}}</el-divider>
+							<template v-for="(slt,sind) in lt.subLandType">
+								<div :key="sind" style="min-width: 25%;margin-right: 5px;float:left;margin-bottom: 5px;">
+									<el-tag style="cursor: pointer;" @click="getDetail">{{slt['name' + $lang.$lang_type]}}</el-tag>
+								</div>
+							</template>
+						</div>
+					</div>
+				</div>
+				<div v-show="dialog.type === 'detail'">
+					<div v-for="(formOpt,ind) in dialog.classes" :key="ind">
+						<el-divider content-position="left">{{formOpt.label}}</el-divider>
+						<div class="option-div"
+							 v-for="(opt,oind) in formOpt.options"
+							 :key="oind">
+							<div v-if="opt.type === 'add'">
+								<el-button @click="addNewSelection(opt,oind,ind)" type="text">+{{opt.label}}</el-button>
+							</div>
+							<div v-else>
+								<el-button type="text" @click="addSelection(opt,oind,ind)">{{opt.label}}</el-button>
+								<i class="el-icon-check" v-show="form.plantType[ind].ind === oind"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</el-dialog>
+	</div>
+</template>
+
+<script>
+const constType = {
+	attribute: 'attribute',
+	attributeValue: 'attributeValue',
+	landtype: 'landType',
+};
+const constStep = {
+	classes: 'classes',
+	detail: 'detail',
+}
+import {
+	getLandType,
+	getLandAttribute,
+	getDisaster
+} from "../../api/selection";
+
+let landTypeSelection = null;
+export default {
+	name: "AddOnePointDetail",
+	data() {
+		return {
+			constType,
+			constStep,
+			classesDialogVisible: false,
+			dialogVisible: false,
+			form: {
+				latlng: {
+					lat: 0,
+					lng: 0,
+				},	// 经纬度
+				info: '',	// 备注
+				imageUrl: '',	// 图像
+				plantType: [],	// 土地类型情况
+			},
+			dialog: {
+				visible: false,
+				type: constType.landtype,
+				step: '',
+				classes: [],
+				detail: [],
+			}
+		}
+	},
+	methods: {
+		openSelection(type) {
+			if (type === constType.landtype) {
+				console.log(type);
+				this.dialog.step = constStep.classes;
+				this.dialog.type = type;
+				this.dialog.visible = true;
+				this.dialog.classes.splice(0,this.dialog.classes.length,...landTypeSelection);
+				console.log(this.dialog.classes);
+			}
+		},
+		getDetail(id) {
+			getLandAttribute(id);
+		},
+		onSubmit() {},
+		handleAvatarSuccess() {}
+	},
+	mounted() {
+		getLandType().then(landType=>{
+			landTypeSelection = landType;
+		});
+		getDisaster().then(console.log)
+		window.$aopd = this;
+	}
+}
+</script>
+
+<style>
+</style>

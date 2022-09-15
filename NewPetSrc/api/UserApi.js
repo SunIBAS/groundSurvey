@@ -12,6 +12,9 @@ const login = (username,password) => {
         username,
     });
 }
+// const login = () => {
+//     return new Promise((s) => s(123));
+// }
 
 const logout = () => request(logoutUrl,{method: 'post'});
 

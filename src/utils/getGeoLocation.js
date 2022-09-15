@@ -1,5 +1,18 @@
+import { Loading } from 'element-ui';
+import { Notification } from 'element-ui';
+
+const showError = msg => {
+    Notification({
+        title: 'Error',
+        message: `[Location Fetch]:${msg}`,
+        offset: 100,
+    });
+}
+
 const getPosition = function() {
-    return new Promise((s,f) => {
+    let loading = Loading.service({ fullscreen: true });
+    return new Promise((s) => {
+        loading.close();
         if(navigator.geolocation){
             //navigator.geolocation.getCurrentPosition这个方法里面有三个参数
             //这个会在界面拉出一个消息框，让用户确认是否允许获取位置,不过pc端我试了都是err，
@@ -19,12 +32,20 @@ const getPosition = function() {
                 },
                 function (err) {
                     // info.innerHTML += "您的浏览器不支持此项技术"
-                    f(err.message);
+                    showError(err.message)
+                    s({
+                        lat: -1,
+                        lng: -1
+                    })
                 },
                 {timeout : 3000}
             )
         } else {
-            f('您的浏览器不支持此项技术')
+            s({
+                lat: -1,
+                lng: -1
+            })
+            showError('您的浏览器不支持此项技术');
         }
     })
 }

@@ -1,349 +1,474 @@
 <template>
 	<div>
 		<el-dialog
-			title="填写信息"
 			:visible.sync="dialogVisible"
-			:fullscreen="true">
-			<el-form ref="form" :model="form" label-width="120px" label-position="top">
-				<el-form-item label="坐标">
-					<el-row :gutter="20" style="margin: auto 0px !important;">
-						<el-col :span="4" style="text-align: center;">lat</el-col>
-						<el-col :span="8">
-							<el-input v-model="form.latlng.lat"></el-input>
-						</el-col>
-						<el-col :span="4" style="text-align: center;">lng</el-col>
-						<el-col :span="8">
-							<el-input v-model="form.latlng.lng"></el-input>
-						</el-col>
-					</el-row>
-				</el-form-item>
-				<el-form-item label="土地类型">
-					<el-row :gutter="20" style="margin: auto 0px !important;">
-<!--						<el-col :span="18">-->
-							<div class="form-select-result" @click="classesDialogVisible=true">
-								<span v-show="selection.type==='classes'">请选择</span>
-								<div v-show="selection.type==='detail'" style="display: flex;flex-direction: column;">
-									<el-breadcrumb separator="/" style="width: 100%;">
-										<el-breadcrumb-item v-for="(so) in selectedOption" :key="so.label">
-											<el-button type="text">{{so.label}}</el-button>
-										</el-breadcrumb-item>
-									</el-breadcrumb>
-									<div>
-										<el-tag v-for="(obj,ind) in form.plantType" type="success" :key="ind" style="margin-right: 4px;">
-											{{selection.content[ind].label}}：{{obj.label ? obj.label : '/'}}
-										</el-tag>
-									</div>
+			:fullscreen="true"
+			:show-close="false">
+			<div slot="title" class="">
+				填写信息&nbsp;&nbsp;
+				<span v-if="step === 1">基础信息</span>
+				<span v-else>样地信息</span>
+				<el-button v-show="step === 2" type="text" @click="step=1" style="float: right;">返回&nbsp;&nbsp;基础信息</el-button>
+			</div>
+			<div v-show="step === 1">
+				<el-form ref="form" :model="form" label-width="120px" label-position="top">
+					<el-form-item label="坐标">
+						<el-row :gutter="20" style="margin: auto 0px !important;">
+							<el-col :span="4" style="text-align: center;">lat</el-col>
+							<el-col :span="7">
+								<el-input v-model.number="form.latitude" @change="saving = false;"></el-input>
+							</el-col>
+							<el-col :span="4" style="text-align: center;">lng</el-col>
+							<el-col :span="7">
+								<el-input v-model.number="form.longitude" @change="saving = false;"></el-input>
+							</el-col>
+							<el-col :span="2" style="text-align: center;">
+								<i class="el-icon-refresh" @click="refreshLocation"></i>
+							</el-col>
+						</el-row>
+					</el-form-item>
+					<el-form-item label="调查时间">
+						<el-row :gutter="5" style="margin: auto 0px !important;">
+							<el-col :span="10">
+								<el-date-picker style="width: 100%"
+												v-model="form.surveyTime"
+												type="date"
+												@change="saving = false"
+												placeholder="选择日期">
+								</el-date-picker>
+							</el-col>
+							<el-col :span="10">
+								<el-time-picker style="width: 100%"
+												@change="saving = false"
+												v-model="form.surveyTime"
+												placeholder="任意时间点">
+								</el-time-picker>
+							</el-col>
+							<el-col :span="4">
+								<el-button type="text" @click="setNow">Now</el-button>
+							</el-col>
+						</el-row>
+					</el-form-item>
+					<el-form-item label="土地类型">
+						<div style="border: 1px solid;border-radius: 5px;padding: 5px;" @click="$refs.landTypeSelection.open(form.landMsg)">
+							<div v-if="form.landMsg.landTypeId !== -1">
+								<el-breadcrumb separator="/" style="width: 100%;">
+									<el-breadcrumb-item v-for="lt in form.landMsg.landTypeList" :key="lt">
+										<el-button type="text">{{lt}}</el-button>
+									</el-breadcrumb-item>
+								</el-breadcrumb>
+								<div>
+									<el-tag v-for="(v,k) in form.landMsg.attributeValueList" type="success" :key="k" style="margin-right: 4px;">
+										{{k}}：{{v ? v : '/'}}
+									</el-tag>
 								</div>
 							</div>
-<!--						</el-col>-->
-<!--						<el-col :span="6">-->
-<!--							<el-button style="width: 100%">历史选项</el-button>-->
-<!--						</el-col>-->
-					</el-row>
-				</el-form-item>
-				<el-form-item label="虫害情况">
-					<el-row :gutter="20" style="margin: auto 0px !important;">
-<!--						<el-col :span="18">-->
-							<el-button style="width: 100%;">请选择</el-button>
-<!--						</el-col>-->
-<!--						<el-col :span="6">-->
-<!--							<el-button style="width: 100%">历史选项</el-button>-->
-<!--						</el-col>-->
-					</el-row>
-				</el-form-item>
-				<el-form-item label="备注">
-					<el-input style="padding: 0 10px;" type="textarea" v-model="form.info"></el-input>
-				</el-form-item>
-				<el-form-item label="图片">
-					<el-upload
-						class="avatar-uploader"
-						:auto-upload="false"
-						action=""
-						:show-file-list="false"
-						:on-change="handleAvatarSuccess">
-						<img style="padding: 0 10px;" v-if="form.imageUrl" :src="form.imageUrl" class="avatar">
-						<i style="padding: 0 10px;" v-else class="el-icon-plus avatar-uploader-icon"></i>
-					</el-upload>
-				</el-form-item>
-				<el-form-item>
-					<el-button style="width: 100%;" type="primary" @click="onSubmit">立即创建</el-button>
-				</el-form-item>
-			</el-form>
-		</el-dialog>
-		<el-dialog
-			:close-on-click-modal="false"
-			:append-to-body="true"
-			width="80%"
-			custom-class="classesDialog"
-			:visible.sync="classesDialogVisible"
-			:title="null">
-			<div style="width: 100%;height: 100%;display: flex;flex-direction: column">
-				<div class="classesDialogBreadCrumb">
-					<el-breadcrumb separator="/" style="width: 100%;">
-						<el-breadcrumb-item v-for="(so,ind) in selectedOption" :key="so.label">
-							<el-button type="text" @click="reselect(ind)">{{so.label}}</el-button>
-						</el-breadcrumb-item>
-					</el-breadcrumb>
-					<el-button type="text" v-show="selection.type === 'detail'" style="font-size: 16px;color: #2196f3"
-							   @click="classesDialogVisible=false">确定</el-button>
-				</div>
-				<div v-if="selection.type === 'classes'">
-					<div>
-						<template v-for="(opt,ind) in selection.content">
-							<div :key="ind" style="min-width: 25%;margin-right: 5px;float:left;margin-bottom: 5px;">
-								<el-tag @click="getCurrentMenus(opt,ind)">{{opt.label}}</el-tag>
-							</div>
-						</template>
-					</div>
-				</div>
-				<div v-else-if="selection.type === 'detail'">
-					<div v-for="(formOpt,ind) in selection.content" :key="ind">
-						<el-divider content-position="left">{{formOpt.label}}</el-divider>
-						<div class="option-div"
-							 v-for="(opt,oind) in formOpt.options"
-							 :key="oind">
-							<div v-if="opt.type === 'add'">
-								<el-button @click="addNewSelection(opt,oind,ind)" type="text">+{{opt.label}}</el-button>
-							</div>
 							<div v-else>
-								<el-button type="text" @click="addSelection(opt,oind,ind)">{{opt.label}}</el-button>
-								<i class="el-icon-check" v-show="form.plantType[ind].ind === oind"></i>
+								<el-button style="width: 100%;" type="text" @click="$refs.landTypeSelection.open(form.landMsg)">请选择</el-button>
 							</div>
 						</div>
-					</div>
-				</div>
+					</el-form-item>
+					<el-form-item label="作物">
+						<el-input placeholder="作物类型" v-model="form.cropType" @change="saving = false;"></el-input>
+						<div style="width: 100%;height: 2px;"></div>
+						<el-input placeholder="作物品种" v-model="form.cropVariety" @change="saving = false;"></el-input>
+					</el-form-item>
+					<el-form-item label="备注">
+						<el-input @change="saving = false;"
+								  type="textarea"
+								  :rows="3"
+								  placeholder="..."
+								  v-model="form.note">
+						</el-input>
+					</el-form-item>
+					<el-form-item>
+						<el-button style="width: 100%" @click="step = 2">样地调查数据填写</el-button>
+					</el-form-item>
+					<el-form-item>
+						<el-button-group style="width: 100%;">
+							<el-button type="primary" @click="updateMainRecord" style="width: 50%;">保存</el-button>
+							<el-button type="danger" @click="exitThisPage" style="width: 50%;">退出</el-button>
+						</el-button-group>
+					</el-form-item>
+				</el-form>
+			</div>
+			<div v-show="step === 2">
+				<el-form label-width="120px" label-position="top">
+					<el-form-item label="样地冠层图片">
+						<el-upload
+							class="avatar-uploader"
+							:auto-upload="false"
+							action=""
+							:show-file-list="false"
+							:on-change="handleAvatarSuccess">
+<!--							<img style="padding: 0 10px;max-width: 100%;" v-if="form.spCanopyImg" :src="`http://172.20.109.115:8080${form.spCanopyImg}`" class="avatar">-->
+<!--							<MyImage :styles="{padding: '0 10px',maxWidth: '100%'}" v-if="form.spCanopyImg"-->
+<!--									 host="http://172.20.109.115:8080"-->
+<!--								   :src="form.spCanopyImg" classes="avatar"></MyImage>-->
+							<img v-if="form.spCanopyImgUrl" style="padding: 0 10px;max-width: 100%;" :src="form.spCanopyImgUrl" alt="">
+							<MyImage :styles="{padding: '0 10px',maxWidth: '100%'}" v-else-if="form.spCanopyImg"
+								   :src="form.spCanopyImg" classes="avatar"></MyImage>
+<!--							<img style="padding: 0 10px;max-width: 100%;" v-if="form.spCanopyImg" :src="`http://172.20.109.115:8080${form.spCanopyImg}`" class="avatar">-->
+							<i style="padding: 0 10px;" v-else class="el-icon-plus avatar-uploader-icon"></i>
+						</el-upload>
+					</el-form-item>
+					<el-form-item>
+						<el-badge style="width: 100%;" :value="form.environmentFactorRecord.length" class="item">
+							<el-button style="width: 100%;"
+									   @click="openAndSetList(componentNameMap.environmentFactorRecord)">环境要素</el-button>
+							<EnvironmentFactor
+								@updateRecordImage="obj => updateRecordImage(componentNameMap.environmentFactorRecord,obj)"
+								@updateRecord="obj => updateRecord(componentNameMap.environmentFactorRecord,obj)"
+								@deleteRecord="id => deleteRecord(componentNameMap.environmentFactorRecord,id)"
+								:ref="componentNameMap.environmentFactorRecord"></EnvironmentFactor>
+						</el-badge>
+					</el-form-item>
+					<el-form-item>
+						<el-badge style="width: 100%;" :value="form.diseaseSysSurveyRecord.length" class="item">
+							<el-button style="width: 100%;"
+									   @updateRecordImage="obj => updateRecordImage(componentNameMap.diseaseSysSurveyRecord,obj)"
+									   @click="openAndSetList(componentNameMap.diseaseSysSurveyRecord)">病害系统调查表</el-button>
+							<DiseaseSysSurveyRecord
+								@updateRecord="obj => updateRecord(componentNameMap.diseaseSysSurveyRecord,obj)"
+								@deleteRecord="id => deleteRecord(componentNameMap.diseaseSysSurveyRecord,id)"
+								:ref="componentNameMap.diseaseSysSurveyRecord"></DiseaseSysSurveyRecord>
+						</el-badge>
+					</el-form-item>
+					<el-form-item>
+						<el-badge style="width: 100%;" :value="form.diseaseSamCollRecord.length" class="item">
+							<el-button style="width: 100%;"
+									   @click="openAndSetList(componentNameMap.diseaseSamCollRecord)">病害样本采集</el-button>
+							<DiseaseSamCollRecord
+								@updateRecordImage="obj => updateRecordImage(componentNameMap.diseaseSamCollRecord,obj)"
+								@updateRecord="obj => updateRecord(componentNameMap.diseaseSamCollRecord,obj)"
+								@deleteRecord="id => deleteRecord(componentNameMap.diseaseSamCollRecord,id)"
+								:ref="componentNameMap.diseaseSamCollRecord"></DiseaseSamCollRecord>
+						</el-badge>
+					</el-form-item>
+					<el-form-item>
+						<el-badge style="width: 100%;" :value="form.diseaseDataCollUAVRecord.length" class="item">
+							<el-button style="width: 100%;"
+									   @click="openAndSetList(componentNameMap.diseaseDataCollUAVRecord)">机地病害采样表</el-button>
+							<DiseaseDataCollUavRecord
+								@updateRecordImage="obj => updateRecordImage(componentNameMap.diseaseDataCollUAVRecord,obj)"
+								@updateRecord="obj => updateRecord(componentNameMap.diseaseDataCollUAVRecord,obj)"
+								@deleteRecord="id => deleteRecord(componentNameMap.diseaseDataCollUAVRecord,id)"
+								:ref="componentNameMap.diseaseDataCollUAVRecord"></DiseaseDataCollUavRecord>
+						</el-badge>
+					</el-form-item>
+					<el-form-item>
+						<el-badge style="width: 100%;" :value="form.pestCollRecordVo.length" class="item">
+							<el-button style="width: 100%;"
+									   @click="openAndSetList(componentNameMap.pestCollRecordVo)">虫害采集</el-button>
+							<PestCollRecord
+								@updateRecordImage="obj => updateRecordImage(componentNameMap.pestCollRecordVo,obj)"
+								@updateRecord="obj => updateRecord(componentNameMap.pestCollRecordVo,obj)"
+								@deleteRecord="id => deleteRecord(componentNameMap.pestCollRecordVo,id)"
+								:ref="componentNameMap.pestCollRecordVo"></PestCollRecord>
+						</el-badge>
+					</el-form-item>
+					<el-form-item>
+						<el-badge style="width: 100%;" :value="form.pestSurveyUAVRecordVo.length" class="item">
+							<el-button style="width: 100%;"
+									   @click="openAndSetList(componentNameMap.pestSurveyUAVRecordVo)">机地虫害调查表</el-button>
+							<PestSurveyUavRecord
+								@updateRecordImage="obj => updateRecordImage(componentNameMap.pestSurveyUAVRecordVo,obj)"
+								@updateRecord="obj => updateRecord(componentNameMap.pestSurveyUAVRecordVo,obj)"
+								@deleteRecord="id => deleteRecord(componentNameMap.pestSurveyUAVRecordVo,id)"
+								:ref="componentNameMap.pestSurveyUAVRecordVo"></PestSurveyUavRecord>
+						</el-badge>
+					</el-form-item>
+					<el-form-item>
+						<el-badge style="width: 100%;" :value="form.soilMoistureCollRecords.length" class="item">
+							<el-button style="width: 100%;"
+									   @click="openAndSetList(componentNameMap.soilMoistureCollRecords)">土壤湿度采集</el-button>
+							<SoilMoistureCollRecord
+								@updateRecordImage="obj => updateRecordImage(componentNameMap.soilMoistureCollRecords,obj)"
+								@updateRecord="obj => updateRecord(componentNameMap.soilMoistureCollRecords,obj)"
+								@deleteRecord="id => deleteRecord(componentNameMap.soilMoistureCollRecords,id)"
+								:ref="componentNameMap.soilMoistureCollRecords"></SoilMoistureCollRecord>
+						</el-badge>
+					</el-form-item>
+					<el-form-item>
+						<el-badge style="width: 100%;" :value="form.wheatYieldCollRecords.length" class="item">
+							<el-button style="width: 100%;"
+									   @click="openAndSetList(componentNameMap.wheatYieldCollRecords)">作物(小麦)产量采集</el-button>
+							<WheatYieldCollRecord
+								@updateRecordImage="obj => updateRecordImage(componentNameMap.wheatYieldCollRecords,obj)"
+								@updateRecord="obj => updateRecord(componentNameMap.wheatYieldCollRecords,obj)"
+								@deleteRecord="id => deleteRecord(componentNameMap.wheatYieldCollRecords,id)"
+								:ref="componentNameMap.wheatYieldCollRecords"></WheatYieldCollRecord>
+						</el-badge>
+					</el-form-item>
+				</el-form>
 			</div>
 		</el-dialog>
+		<LandTypeSelection @updateLandMsg="updateLandMsg" ref="landTypeSelection"></LandTypeSelection>
 	</div>
 </template>
 
 <script>
 import {
-	getMenus,
-	getForm
+	// createInvestRecord,
+	getInvestRecordById,
+	updateInvestRecord,
+	Dirs,
+	uploadImage
 } from "../../api/selection";
+// import {
+// 	Ts2Sting
+// } from "../../utils/time";
+import LandTypeSelection from "../../components/Forms/LandTypeSelection";
 import {
-	classesMenuXForm
-} from "../../utils/classesMenuXForm";
+	formatLandMsg
+} from "../../utils/formatLandMsg";
 import {
-	rebuildMenus,
-	rebuildForm
-} from "../../utils/rebuildMenus";
+	readFileAsDataURL
+} from "../../utils/htmlUtils";
+import MyImage from "../../components/image";
+import EnvironmentFactor from "./Records/EnvironmentFactor";
+import DiseaseSysSurveyRecord from "./Records/DiseaseSysSurveyRecord";
+import DiseaseDataCollUavRecord from "./Records/DiseaseDataCollUavRecord";
+import DiseaseSamCollRecord from "./Records/DiseaseSamCollRecord";
+import PestCollRecord from "./Records/PestCollRecord";
+import PestSurveyUavRecord from "./Records/PestSurveyUavRecord";
+import SoilMoistureCollRecord from "./Records/SoilMoistureCollRecord";
+import WheatYieldCollRecord from "./Records/WheatYieldCollRecord";
+import {getPosition} from "../../utils/getGeoLocation";
 
-let _classesMenuXForm = null;
-let menus = [];
+let savingTimeoutHandle = null;
+const componentNameMap = {
+	'environmentFactorRecord': 'environmentFactorRecord',
+	'diseaseSysSurveyRecord': 'diseaseSysSurveyRecord',
+	'diseaseSamCollRecord': 'diseaseSamCollRecord',
+	'diseaseDataCollUAVRecord': 'diseaseDataCollUAVRecord',
+	'pestCollRecordVo': 'pestCollRecordVo',
+	'pestSurveyUAVRecordVo': 'pestSurveyUAVRecordVo',
+	'soilMoistureCollRecords': 'soilMoistureCollRecords',
+	'wheatYieldCollRecords': 'wheatYieldCollRecords',
+};
 export default {
 	name: "AddOnePointDetail",
+	components: {
+		WheatYieldCollRecord,
+		SoilMoistureCollRecord,
+		PestSurveyUavRecord,
+		PestCollRecord,
+		DiseaseSamCollRecord,
+		DiseaseDataCollUavRecord, DiseaseSysSurveyRecord, EnvironmentFactor, MyImage, LandTypeSelection},
 	data() {
 		return {
-			classesDialogVisible: false,
+			saving: true,
+			componentNameMap,
+			lang: this.$lang.$lang_type,
 			dialogVisible: false,
+			step: 1,
+			id: 1,
+			userId: 3,
 			form: {
-				latlng: {
-					lat: 0,
-					lng: 0,
-				},	// 经纬度
-				info: '',	// 备注
-				imageUrl: '',	// 图像
-				plantType: [],	// 土地类型情况
-			},
-			selection: {
-				type: 'classes', // classes 类别  detail 一个类别下的详细选项
-				content: []
-			},
-			// 已经选择的内容（面包屑，和定位）
-			selectedOption: [
-				{ id: -1,label: '选择' },
-			]
+				latitude: 0,
+				longitude: 0,
+				surveyTime: new Date(),
+				landMsg: {
+					landTypeId: -1,
+					// [天然林,用材林]
+					attributeValues: {
+					},
+					landTypeList: [],
+					attributeValueList: {
+					}
+				},
+				cropType: '',	 // 作物类型
+				cropVariety: '', // 作物品种
+				note: '',
+				spCanopyImg: '',
+				spCanopyImgUrl: '',
+				diseaseSysSurveyRecord: [], // 病害系统调查表
+				diseaseSamCollRecord: [], //	病害样本采集表
+				pestCollRecordVo: [], //	虫害采集表Vo
+				diseaseDataCollUAVRecord: [], //	机-地病害数据采集表
+				pestSurveyUAVRecordVo: [], //	机-地虫害调查表Vo
+				soilMoistureCollRecords: [], // 土壤湿度采集表
+				wheatYieldCollRecords: [], // 小麦产量采集表
+				environmentFactorRecord: [], // 环境要素
+			}
 		}
 	},
 	methods: {
-		onSubmit() {},
-		handleAvatarSuccess(file, fileList) {
-			// alert('123');
-			console.log(fileList.length);
-			this.form.imageUrl = URL.createObjectURL(file.raw);
-			console.log(this.form.imageUrl);
+		setNow() {
+			this.form.surveyTime = new Date();
+			this.saving = false;
 		},
-		// 从大类中获取下一个细分类的菜单
-		getCurrentMenus(opt,ind) {
-			this.selectedOption.push({
-				id: opt.id,
-				ind: ind,
-				label: this.selection.content[ind].label
+		// todo
+		handleAvatarSuccess(response, file, fileList) {
+			console.log(response, file, fileList)
+			readFileAsDataURL(response.raw).then(url => {
+				this.form.spCanopyImgUrl = url;
 			});
-			if (this.selection.content[ind].children) {
-				this.selection = {
-					type: 'classes',
-					content: this.selection.content[ind].children
+			uploadImage(response.raw,Dirs.MainRecord).then((ret) => {
+				let obj = {
+					id: this.id,
+					"spCanopyImg": ret,
 				}
-			} else {
-				getForm(this.selection.content[ind].id).then(f => rebuildForm(f,this.$lang.$lang_type))
-				.then(form => {
-					this.form.plantType = form.map(() => {
-						return {
-							id: '',
-							ind: -1,
-							label: '',
-						}
-					})
-					this.selection = {
-						type: 'detail',
-						content: form
-					}
+				updateInvestRecord(obj,(this.form.surveyTime || {getTime(){return 0}}).getTime()).then(() => {
+					this.$message({
+						offset: 100,
+						message: '提交成功',
+						type: 'success'
+					});
 				});
-				// this.form.plantType = this.selection.content[ind].form.map(() => {
-				// 	return {
-				// 		id: '',
-				// 		ind: -1,
-				// 		label: ''
-				// 	}
-				// });
-				// this.selection = {
-				// 	type: 'detail',
-				// 	content: this.selection.content[ind].form
-				// }
-			}
-		},
-		// ind => (this.selectedOption).index
-		reselect(ind) {
-			if (ind === 0) {
-				this.form.plantType = [];
-				this.selection.type = 'classes';
-				this.selection.content = menus;
-				this.selectedOption = [{id:-1,label: '选择'}];
-			} else {
-				this.form.plantType = [];
-				let tmp = this.selectedOption.slice(1,ind);
-				this.selection.type = 'classes';
-				this.selection.content = menus;
-				this.selectedOption = [{id:-1,label: '选择'}];
-				tmp.forEach(t => this.getCurrentMenus(t.ind));
-			}
-		},
-		// 最后一级选择，点击后添加到选项列表中
-		addSelection(opt,oind,ind) {
-			this.$set(this.form.plantType,ind, {
-				id: opt.id,
-				ind: oind,
-				label: opt.label
 			});
 		},
-		addNewSelection(opt,oind,ind) {
-			this.$prompt(opt.label, '添加', {
-				confirmButtonText: '确定',
-				cancelButtonText: '取消',
-			}).then(({ value }) => {
-				this.$message({
-					type: 'success',
-					message: '新增内容: ' + value + ind
-				});
-				let m = menus;
-				this.selectedOption.slice(1).forEach(i => {
-					if (m[i.ind].children) {
-						m = m[i.ind].children;
-					} else {
-						m = m[i.ind];
-					}
-				});
-				m.form[ind].options.unshift({
-					id: `id_${new Date().getTime()}`,
-					label: value,
-				})
-			});
+		updateLandMsg(lm) {
+			this.form.landMsg = lm;
 		},
-		setFormData(obj) {
-			// obj = {
-			// 	"lat": 43.962179139526434,
-			// 	"lng": 89.54818725585939,
-			// 	"info": "123",
-			// 	"imageUrl": "",
-			// 	"plantType": [
-			// 		"莲藕",
-			// 		"平原"
-			// 	]
-			// }
-			let ret = _classesMenuXForm.menus2Form(obj.plantType);
-			this.form.latlng.lat = obj.lat;
-			this.form.latlng.lng = obj.lng;
-			this.form.imageUrl = obj.imageUrl;
-			this.form.info = obj.info;
-			this.form.plantType.splice(0,this.form.plantType.length,ret.plantType);
-			this.selectedOption.splice(0,this.selectedOption.length,ret.selectedOption);
-			this.selectedOption.unshift({
-				id: -1,
-				label: '选择'
-			})
-			this.selection.content.splice(0,this.selection.content.length,ret.selection.content);
-			this.selection.type = ret.selection.type;
-		},
-		buildFormData() {
+		// 向服务器更新记录
+		updateMainRecord() {
 			let obj = {
-				lat: this.form.latlng.lat,
-				lng: this.form.latlng.lng,
-				info: this.form.info,
-				imageUrl: this.form.imageUrl,
-				plantType: this.form.plantType.map(_ => _.id).filter(_=>_)
+				"cropType": this.form.cropType,
+				"cropVariety": this.form.cropVariety,
+				"id": this.id,
+				"landMsg": JSON.stringify({
+					landTypeId: this.form.landMsg.landTypeId,
+					attributeValues: this.form.landMsg.attributeValues,
+				}),
+				"latitude": this.form.latitude,
+				"longitude": this.form.longitude,
+				"note": this.form.note,
+				// "spCanopyImg": "string",
+				// "surveyTime": Ts2Sting(this.form.surveyTime)
 			};
-			return obj;
+			return updateInvestRecord(obj,this.form.surveyTime.getTime()).then(() => {
+				this.saving = true;
+				if (savingTimeoutHandle) {
+					clearTimeout(savingTimeoutHandle);
+				}
+				this.$message({
+					offset: 100,
+					message: '提交成功',
+					type: 'success'
+				});
+				return '';
+			});
 		},
-		// beforeAvatarUpload(file) {
-		// 	const isJPG = file.type === 'image/jpeg';
-		// 	const isLt2M = file.size / 1024 / 1024 < 2;
-		//
-		// 	if (!isJPG) {
-		// 		this.$message.error('上传头像图片只能是 JPG 格式!');
-		// 	}
-		// 	if (!isLt2M) {
-		// 		this.$message.error('上传头像图片大小不能超过 2MB!');
-		// 	}
-		// 	return isJPG && isLt2M;
-		// }
+		openAndSetList(name) {
+			if (name in componentNameMap) {
+				this.$refs[componentNameMap[name]].id = this.id;
+				this.$refs[componentNameMap[name]].show();
+				this.$refs[componentNameMap[name]].setList(this.form[componentNameMap[name]]);
+			}
+		},
+		updateRecord(name,obj) {
+			let key = componentNameMap[name];
+			if (key) {
+				let found = false;
+				for (let i = 0;i < this.form[key].length;i++) {
+					if (this.form[key][i].id === obj.id) {
+						this.form[key][i] = obj;
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					this.form[key].push(obj);
+				}
+			}
+		},
+		deleteRecord(name,id) {
+			let key = componentNameMap[name];
+			if (key) {
+				for (let i = 0;i < this.form[key].length;i++) {
+					if (this.form[key][i].id === id) {
+						this.form[key].splice(i,1);
+						break;
+					}
+				}
+			}
+		},
+		refreshLocation() {
+			getPosition().then(latlng => {
+				this.form.longitude = latlng.lng;
+				this.form.latitude = latlng.lat;
+			});
+		},
+		exitThisPage() {
+			if (!this.saving) {
+				if (savingTimeoutHandle) {
+					clearTimeout(savingTimeoutHandle);
+				}
+				this.saving = true;
+				this.updateMainRecord().then(() => {
+					this.dialogVisible = false;
+				});
+			}
+			this.dialogVisible = false;
+		},
+		loadMainRecord(cb) {
+			getInvestRecordById(this.id).then(obj => {
+				this.saving = false;
+				this.form.environmentFactorRecord = obj.environmentFactorRecord || [];
+				this.form.diseaseSysSurveyRecord = obj.diseaseSysSurveyRecord || [];
+				this.form.diseaseSamCollRecord = obj.diseaseSamCollRecord || [];
+				this.form.diseaseDataCollUAVRecord = obj.diseaseDataCollUAVRecord || [];
+				this.form.pestSurveyUAVRecordVo = obj.pestSurveyUAVRecordVo || [];
+				this.form.pestCollRecordVo = obj.pestCollRecordVo || [];
+				this.form.soilMoistureCollRecords = obj.soilMoistureCollRecords || [];
+				this.form.wheatYieldCollRecords = obj.wheatYieldCollRecords || [];
+				this.form.cropVariety = obj.cropVariety;
+				this.form.cropType = obj.cropType;
+				this.form.longitude = obj.longitude;
+				this.form.latitude = obj.latitude;
+				this.form.note = obj.note;
+				this.form.spCanopyImg = obj.spCanopyImg;
+				this.form.spCanopyImgUrl = "";
+				this.id = obj.id;
+				this.userId = obj.userId;
+				formatLandMsg(JSON.parse(obj.landMsg),this.lang).then(lm => {
+					for (let i in lm) {
+						this.$set(this.form.landMsg,i,lm[i]);
+					}
+				});
+				cb();
+			});
+		},
+		updateRecordImage(name,obj) {
+			console.log(name);
+			console.log(obj);
+			let key = componentNameMap[name];
+			if (key) {
+				let mapObj = {};
+				obj.forEach(o => {
+					mapObj[o.id] = o;
+				});
+				if (this.form[key] instanceof Array) {
+					for (let ind = 0;ind < this.form[key].length;ind++) {
+						let cobj = mapObj[this.form[key][ind].id];
+						for (let cobjKey in cobj) {
+							this.$set(this.form[key][ind],cobjKey,cobj[cobjKey]);
+						}
+					}
+				}
+			}
+		}
 	},
 	watch: {
-		dialogVisible() {
-			this.reselect(0);
+		saving() {
+			console.log(`watch saving = ${this.saving}`);
+			if (!this.saving) {
+				if (savingTimeoutHandle) {
+					clearTimeout(savingTimeoutHandle);
+				}
+				savingTimeoutHandle = setTimeout(() => {
+					this.updateMainRecord();
+				},5000);
+			}
 		}
 	},
 	mounted() {
-		getMenus().then(_menus=>{
-			menus = rebuildMenus(_menus,this.$lang.$lang_type);
-			_classesMenuXForm = classesMenuXForm(menus);
-		});
-		window.$aopd = this;
+		window.$AddOnePointDetail = this;
 	}
 }
 </script>
 
 <style>
-	.avatar {
-		width: 500px;
-		max-width: 50%;
-	}
-	.avatar-uploader .el-upload--text {
-		text-align: left;
-	}
-	.classesDialogBreadCrumb {
-		display: flex;
-		width: 100%;
-		height: 40px;
-		line-height: 40px;
-		font-size: 18px;
-		margin-bottom: 10px;
-	}
-	.classesDialog .el-dialog__header {
-		display: none !important;
-	}
-	.form-select-result {
-		width: 100%;
-		border: 1px solid #dcdfe6;
-		padding: 5px 10px;
-		border-radius: 4px;
-		box-sizing: border-box;
-	}
-	.option-div {
-		display: inline-block;
-		margin-right: 10px !important;
-		padding: 0 5px;
-	}
 </style>

@@ -33,10 +33,10 @@
 import {
 	login,
 	register
-} from "../../api/UserApi";
+} from "../api/UserApi";
 import {
 	Storage
-} from "../../utils/storage";
+} from "../utils/storage";
 
 export default {
 	name: "Login",
@@ -53,12 +53,12 @@ export default {
 	methods: {
 		toLogin() {
 			login(this.form.username,this.form.password)
-			.then(obj => {
-				if (obj) {
-					Storage.set_user_info(obj);
-					location.reload();
-				}
-			});
+				.then(obj => {
+					if (obj) {
+						Storage.set_user_info(obj);
+						location.reload();
+					}
+				});
 		},
 		register() {
 			if (this.form.password === this.form.rePassword) {
@@ -86,20 +86,20 @@ export default {
 </script>
 
 <style>
-	.login-form {
-		border: 1px solid #dcdfe6;
-		border-radius: 4px;
-		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-		margin-top: 20vh;
-		background: white;
-	}
-	.background {
-		width: 100vw;
-		height: 120vh;
-		overflow: hidden;
-		background: #f5f5f5;
-		background-image: linear-gradient(45deg, #fff 25%, transparent 0, transparent 75%, #fff 0), linear-gradient(45deg, #fff 25%, transparent 0, transparent 75%, #fbfbfb 0);
-		background-position: 0 0, 50px 50px;
-		background-size: 100px 100px;
-	}
+.login-form {
+	border: 1px solid #dcdfe6;
+	border-radius: 4px;
+	box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+	margin-top: 20vh;
+	background: white;
+}
+.background {
+	width: 100vw;
+	height: 120vh;
+	overflow: hidden;
+	background: #f5f5f5;
+	background-image: linear-gradient(45deg, #fff 25%, transparent 0, transparent 75%, #fff 0), linear-gradient(45deg, #fff 25%, transparent 0, transparent 75%, #fbfbfb 0);
+	background-position: 0 0, 50px 50px;
+	background-size: 100px 100px;
+}
 </style>

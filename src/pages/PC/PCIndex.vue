@@ -3,7 +3,7 @@
 		<AddOnePointDetail ref="aopd"></AddOnePointDetail>
 		<!-- 修改底图 -->
 		<ChangeMap ref="cmap"></ChangeMap>
-		<div class="top-center" v-show="marker_click">
+		<div :class="marker_class" :style="marker_css" v-show="marker_click">
 			<el-button type="text" @click="addOnePointDetail">添加地点</el-button>
 			<i class="el-icon-close" style="line-height: 40px;float: right;padding-right: 5px;" @click="removeMarker"></i>
 		</div>
@@ -11,10 +11,26 @@
 			<!--转到当前位置-->
 			<i class="el-icon-map-location"></i>
 		</div>
-		<div class="right-top" @click="()=>{}">
+		<div class="right-top" @click="$refs.recordList.dialogVisible = true;">
 			<!--历史列表-->
 			<i class="el-icon-s-grid"></i>
 		</div>
+		<RecordList @loadMainRecordById="loadMainRecordById" ref="recordList"></RecordList>
+		<div class="left-top" @click="logoutDialogVisible = true;">
+			<!--退出登录-->
+			<i class="el-icon-circle-close"></i>
+		</div>
+
+		<el-dialog
+			title="登出"
+			:visible.sync="logoutDialogVisible"
+			width="80%">
+			<span>去顶退出登录？</span>
+			<span slot="footer" class="dialog-footer">
+    <el-button @click="logoutDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="logout()">确 定</el-button>
+  </span>
+		</el-dialog>
 	</div>
 </template>
 
@@ -27,6 +43,20 @@ import ChangeMap from "./ChangeMap";
 import {
 	getPosition
 } from './../../utils/getGeoLocation'
+import {
+	logout
+} from "../../api/UserApi";
+import {
+	Storage
+} from "../../utils/storage";
+import {
+	checkOS,
+	OS
+} from "../../utils/checkOS";
+import {
+	createInvestRecord
+} from "../../api/selection";
+import RecordList from "./RecordList";
 
 let marker = null;
 let latlng = null;
@@ -35,10 +65,16 @@ export default {
 	props: {
 		ifr: {}
 	},
-	components: {ChangeMap, AddOnePointDetail},
+	components: {RecordList, ChangeMap, AddOnePointDetail},
 	data() {
 		return {
 			marker_click: false,
+			marker_class: 'top-center',
+			marker_css: {
+				width: '200px',
+				left: 'calc(50% - 100px)',
+			},
+			logoutDialogVisible: false
 		}
 	},
 	methods: {
@@ -49,11 +85,21 @@ export default {
 			marker = null;
 			this.marker_click = false;
 		},
-		addOnePointDetail() {
+		loadMainRecordById(id) {
+			this.$refs.aopd.id = id;
+			this.$refs.aopd.loadMainRecord();
 			this.$refs.aopd.dialogVisible = true;
-			this.removeMarker();
-			this.$refs.aopd.form.latlng.lat = latlng.lat;
-			this.$refs.aopd.form.latlng.lng = latlng.lng;
+		},
+		addOnePointDetail() {
+			createInvestRecord().then(id => {
+				this.$refs.aopd.id = id;
+				this.$refs.aopd.dialogVisible = true;
+				this.removeMarker();
+				this.$refs.aopd.loadMainRecord(() => {
+					this.$refs.aopd.form.latitude = latlng.lat;
+					this.$refs.aopd.form.longitude = latlng.lng;
+				});
+			})
 		},
 		addOnePoint(time,_marker,_latlng) {
 			if ('before' === time) {
@@ -76,12 +122,30 @@ export default {
 			}).catch(e => {
 				this.$message(e);
 			})
+		},
+		// 退出登录
+		logout() {
+			this.logoutDialogVisible = false;
+			logout().then(() => {
+				Storage.set_user_info(null);
+				window.location.reload();
+			});
 		}
 	},
 	mounted() {
 		window.$pc = this;
 		console.log(this.$addin.$leafletAPI);
 		addMarker(this)(this.addOnePoint.bind(this));
+		checkOS().then(ret => {
+			if (ret === OS.Android) {
+				this.marker_class = 'bottom-center';
+			}
+			if (window.innerWidth < 500) {
+				this.marker_class = 'bottom-center';
+			}
+			this.marker_css.width = window.innerWidth - 190;
+			this.marker_css.left = `calc(50% - 80px)`;
+		});
 	}
 }
 </script>
@@ -99,6 +163,18 @@ export default {
 .top-center {
 	position: fixed;
 	top: 10px;
+	width: 200px;
+	height: 40px;
+	background: white;
+	background-size: 100%;
+	line-height: 25px;
+	left: calc(50% - 100px);
+	text-align: center;
+	border-radius: 5px;
+}
+.bottom-center {
+	position: fixed;
+	bottom: 30px;
 	width: 200px;
 	height: 40px;
 	background: white;
@@ -139,6 +215,20 @@ export default {
 	text-align: center;
 	position: fixed;
 	right: 10px;
+	top: 20px;
+	width: 40px;
+	height: 40px;
+	background: white;
+	border-radius: 60px;
+	border: 2px solid white;
+	background-size: 100%;
+	cursor: pointer;
+}
+.left-top {
+	line-height: 40px;
+	text-align: center;
+	position: fixed;
+	left: 10px;
 	top: 20px;
 	width: 40px;
 	height: 40px;

@@ -1,10 +1,10 @@
 <template>
 	<div style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);padding: 10px;border-radius: 4px">
+		<div class="my-card-title">{{title}}</div>
 		<div>
 			<el-button v-if="edit" @click="$emit('open')" type="text">编辑</el-button>
 			<el-button v-else @click="$emit('open')" type="text">查看</el-button>
 		</div>
-		<div class="my-card-title">{{title}}</div>
 		<div v-for="o in options" :key="o.name">
 			<div class="my-card-option-title">{{o.label}}</div>
 			<div class="my-card-option-content">&nbsp;&nbsp;&nbsp;{{o.optionKey[o.value]}}</div>

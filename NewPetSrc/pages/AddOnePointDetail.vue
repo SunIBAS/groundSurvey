@@ -4,21 +4,22 @@
 			 style="position: absolute;top: 0;height: 30%;
 			 box-sizing: border-box;padding: 5px;
 			 width: 100%;z-index: 1000;background: rgba(0,0,0,0.1);">
-			仅查看
+			{{$lang.get('仅查看')}}
 		</div>
 		<div v-show="dialogVisible" style="position:fixed;bottom: 0px;z-index: 1;background: white;height: 70%;overflow-y: scroll;">
 			<div style="padding: 10px;font-size: 18px;font-weight: bold;position: fixed;z-index: 100;background: white;width: calc(100% - 20px);">
-				填写信息
+				<span v-if="edit">{{$lang.get('填写信息')}}</span>
+				<span v-else>{{$lang.get('信息')}}</span>
 				<span style="float: right;font-weight: bold;font-size: 14px;color: #686868;">
-					<span @click="deleteRecord()" >删除记录</span>
+					<span @click="deleteRecord()" >{{$lang.get('删除记录')}}</span>
 					&nbsp;&nbsp;&nbsp;&nbsp;
-					<span v-if="edit" @click="closeAndSave" style="float: right;font-weight: bold;font-size: 14px;color: #686868;">关闭并保存</span>
-					<span v-else @click="closeAndSave(false)" >关闭</span>
+					<span v-if="edit" @click="closeAndSave" style="float: right;font-weight: bold;font-size: 14px;color: #686868;">{{$lang.get('关闭并保存')}}</span>
+					<span v-else @click="closeAndSave(false)" >{{$lang.get('关闭')}}</span>
 				</span>
 			</div>
 			<el-form label-width="120px"
 					 label-position="top" class="my-form">
-				<el-form-item label="坐标">
+				<el-form-item :label="$lang.get('坐标')">
 					<el-row :gutter="20">
 						<el-col :span="4">lat</el-col>
 						<el-col :span="8">{{formData.lat || 'null'}}</el-col>
@@ -26,7 +27,7 @@
 						<el-col :span="8">{{formData.lng || 'null'}}</el-col>
 					</el-row>
 				</el-form-item>
-				<el-form-item label="调查时间">
+				<el-form-item :label="$lang.get('调查时间')">
 					<el-row :gutter="5" style="margin: auto 0px !important;">
 						<el-col :span="10">
 							<el-date-picker :disabled="!edit"
@@ -34,7 +35,7 @@
 											v-model="formData.surveyTime"
 											type="date"
 											@change="saving = false"
-											placeholder="选择日期">
+											:placeholder="$lang.get('日期')">
 							</el-date-picker>
 						</el-col>
 						<el-col :span="10">
@@ -42,7 +43,7 @@
 											style="width: 100%"
 											@change="saving = false"
 											v-model="formData.surveyTime"
-											placeholder="任意时间点">
+											:placeholder="$lang.get('时间')">
 							</el-time-picker>
 						</el-col>
 						<el-col :span="4">
@@ -51,7 +52,7 @@
 						</el-col>
 					</el-row>
 				</el-form-item>
-				<el-form-item label="土地类型">
+				<el-form-item :label="$lang.get('土地类型')">
 					<div style="border: 1px solid;border-radius: 5px;padding: 5px;" @click="openLandTypeSelection">
 						<div v-if="formData.landMsg.landTypeId !== -1">
 							<el-breadcrumb separator="/" style="width: 100%;">
@@ -66,12 +67,12 @@
 							</div>
 						</div>
 						<div v-else>
-							<el-button style="width: 100%;" :disabled="!edit" type="text" @click="openLandTypeSelection">请选择</el-button>
+							<el-button style="width: 100%;" :disabled="!edit" type="text" @click="openLandTypeSelection">{{$lang.get('请选择')}}</el-button>
 						</div>
 					</div>
 				</el-form-item>
-				<el-form-item label="作物类型">
-					<el-select style="width: 100%;" :disabled="!edit" v-model="formData.cropType" clearable placeholder="请选择">
+				<el-form-item :label="$lang.get('作物类型')">
+					<el-select style="width: 100%;" :disabled="!edit" v-model="formData.cropType" clearable :placeholder="$lang.get('请选择')">
 						<el-option
 							v-for="item in cropTypes"
 							:key="item.id"
@@ -87,17 +88,17 @@
 				<el-form-item>
 					<el-row :gutter="10">
 						<el-col :span="8">
-							<MyCard title="病害信息" :edit="edit"
+							<MyCard :title="$lang.get('病害信息')" :edit="edit"
 									@open="drawerSetting.type = drawerTypes.disease;drawerSetting.visible = true;"
 									:options="dpdForm[drawerTypes.disease]"></MyCard>
 						</el-col>
 						<el-col :span="8">
-							<MyCard title="虫害信息" :edit="edit"
+							<MyCard :title="$lang.get('虫害信息')" :edit="edit"
 									@open="drawerSetting.type = drawerTypes.pest;drawerSetting.visible = true;"
 									:options="dpdForm[drawerTypes.pest]"></MyCard>
 						</el-col>
 						<el-col :span="8">
-							<MyCard title="干旱信息" :edit="edit"
+							<MyCard :title="$lang.get('干旱信息')" :edit="edit"
 									@open="drawerSetting.type = drawerTypes.drought;drawerSetting.visible = true;"
 									:options="dpdForm[drawerTypes.drought]"></MyCard>
 						</el-col>
@@ -116,7 +117,8 @@
 <!--		<div class="aop_my_drawer" v-show="drawerSetting.visible">-->
 		<el-drawer direction="btt" size="70%" :withHeader="false" :visible="drawerSetting.visible">
 			<div style="padding: 10px;font-size: 18px;font-weight: bold;position: fixed;z-index: 100;background: white;width: 100%;">
-					填写信息
+				<span v-if="edit">{{$lang.get('填写信息')}}</span>
+				<span v-else>{{$lang.get('信息')}}</span>
 				<i style="float: right;" @click="drawerSetting.visible = false;" class="el-icon-close"></i>
 			</div>
 			<div style="padding: 10px;margin-top: 44px;">
@@ -222,14 +224,14 @@ export default {
 						value: '',
 						options: [],
 						optionKey: {},
-						label: '病害类型',
+						label: this.$lang.get('病害类型'),
 					},
 					{
 						name: 'diseaseSeverity',
 						value: '',
 						options: [],
 						optionKey: {},
-						label: '病害程度',
+						label: this.$lang.get('病害程度'),
 					},
 				],
 				[drawerTypes.pest]: [
@@ -238,14 +240,14 @@ export default {
 						value: '',
 						options: [],
 						optionKey: {},
-						label: '虫害类型',
+						label: this.$lang.get('虫害类型'),
 					},
 					{
 						name: 'pestSeverity',
 						value: '',
 						options: [],
 						optionKey: {},
-						label: '虫害程度',
+						label: this.$lang.get('虫害程度'),
 					},
 				],
 				[drawerTypes.drought]: [
@@ -254,7 +256,7 @@ export default {
 						value: '',
 						options: [],
 						optionKey: {},
-						label: '干旱程度',
+						label: this.$lang.get('干旱程度'),
 					},
 				]
 			},
@@ -270,7 +272,7 @@ export default {
 	},
 	methods: {
 		deleteRecord() {
-			this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+			this.$confirm(this.$lang.get('此操作将永久删除该记录, 是否继续?'), this.$lang.get('提示'), {
 				confirmButtonText: '确定',
 				cancelButtonText: '取消',
 				type: 'warning'

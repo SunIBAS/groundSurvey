@@ -91,4 +91,120 @@ window.lang = {
         Chs: '提示',
         En: 'Tip'
     },
+	'确定': {
+		Chs: '确定',
+		En: 'Yes'
+	},
+	'取消': {
+		Chs: '取消',
+		En: 'No'
+	},
+	'删除成功': {
+		Chs: '删除成功',
+		En: 'Successfully deleted'
+	},
+	'已取消删除': {
+		Chs: '已取消删除',
+		En: 'Undeleted'
+	},
+	'提交成功': {
+		Chs: '提交成功',
+		En: 'Successfully Submitted'
+	},
+	'更换底图': {
+		Chs: '更换底图',
+		En: 'Replace Basemap'
+	},
+	'属性': {
+		Chs: '属性',
+		En: 'Attribute'
+	},
+	'类型': {
+		Chs: '类型',
+		En: 'Type'
+	},
+	'返回': {
+		Chs: '返回',
+		En: 'Return'
+	},
+	'提交': {
+		Chs: '提交',
+		En: 'Submit'
+	},
+	'用户名': {
+		Chs: '用户名',
+		En: 'Username'
+	},
+	'密码': {
+		Chs: '密码',
+		En: 'Password'
+	},
+	'确认密码': {
+		Chs: '确认密码',
+		En: 'Confirm Password'
+	},
+	'登录': {
+		Chs: '登录',
+		En: 'Login'
+	},
+	'注册': {
+		Chs: '注册',
+		En: 'Register'
+	},
+	'注册成功': {
+		Chs: '注册成功',
+		En: 'Successfully Register'
+	},
+	'密码不一致': {
+		Chs: '密码不一致',
+		En: 'Password does not match'
+	},
+	'编辑': {
+		Chs: '编辑',
+		En: 'Edit'
+	},
+	'查看': {
+		Chs: '查看',
+		En: 'Check'
+	},
+	'查看图片': {
+		Chs: '查看图片',
+		En: 'Check Img'
+	},
+	'创建记录': {
+		Chs: '创建记录',
+		En: 'Create A Record'
+	},
+	'刷新': {
+		Chs: '刷新',
+		En: 'Refresh'
+	},
+	'删除': {
+		Chs: '删除',
+		En: 'Delete'
+	},
+	'创建时间': {
+		Chs: '创建时间',
+		En: 'Creation Time'
+	},
+	'调查时间': {
+		Chs: '调查时间',
+		En: 'Survey Time'
+	},
+	'更新时间': {
+		Chs: '更新时间',
+		En: 'Update Time'
+	},
+	'语言': {
+		Chs: '语言',
+		En: 'Language'
+	},
+	'设置': {
+		Chs: '设置',
+		En: 'Setting'
+	},
+	'离线登录': {
+    	Chs: '离线登录',
+		En: 'Offline Login'
+	}
 };

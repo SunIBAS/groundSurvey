@@ -1,5 +1,8 @@
-import Cookies from 'js-cookie';
-const Lang_Cookie = '__lang__cookie__'
+// import Cookies from 'js-cookie';
+const Lang_Cookie = '__lang__cookie__';
+import {
+    Storage
+} from "./storage";
 
 export const systemLangOptions = {
     Chs: {
@@ -20,17 +23,20 @@ export const systemLangOptions = {
 };
 
 function setSystemLang(lang) {
-    Cookies.set(Lang_Cookie,lang);
+    return Storage._set_info_to_sessionStorage(Lang_Cookie,lang);
+    // Cookies.set(Lang_Cookie,lang);
 }
 
 function getSystemLang() {
-    let lang = Cookies.get(Lang_Cookie);
-    if (!lang) {
-        // debugger
-        lang = 'Chs';
-        setSystemLang(lang);
-    }
-    return lang;
+    // let lang = Cookies.get(Lang_Cookie);
+    return Storage._get_info_from_sessionStorage(Lang_Cookie).then(lang => {
+        if (!lang) {
+            // debugger
+            lang = 'Chs';
+            setSystemLang(lang);
+        }
+        return lang;
+    });
 }
 
 export const Lang = Vue => {
@@ -61,19 +67,21 @@ export const Lang = Vue => {
             }
         }
     });
-    let _lang = getSystemLang();
-    Vue.prototype.$lang = {
-        setType(type) {
-            $lang.setType(type);
-            this.$lang_type = type;
-        },
-        get(word) {
-            return $lang.get(word);
-        },
-        setVueInst($vue) {
-            $lang.setVueInst($vue);
-        },
-        $lang_type: _lang
-    }
-    $lang.setType(_lang);
+    return getSystemLang().then(_lang => {
+        Vue.prototype.$lang = {
+            setType(type) {
+                $lang.setType(type);
+                this.$lang_type = type;
+            },
+            get(word) {
+                return $lang.get(word);
+            },
+            setVueInst($vue) {
+                $lang.setVueInst($vue);
+            },
+            $lang_type: _lang
+        }
+        $lang.setType(_lang);
+        return "";
+    });
 }

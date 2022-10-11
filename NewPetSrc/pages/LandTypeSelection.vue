@@ -4,11 +4,13 @@
 		:fullscreen="true"
 		:show-close="false">
 		<div slot="title" class="">
-			土地类型&nbsp;&nbsp;
-			<span v-if="showType === constType.landtype">类型</span>
-			<span v-else>属性</span>
-			<el-button v-show="showType === constType.attribute" type="text" @click="showType = constType.landtype" style="float: right;">返回&nbsp;&nbsp;类型</el-button>
-			<el-button v-show="showType !== constType.attribute" type="text" @click="dialogVisible = false" style="float: right;">返回</el-button>
+			{{$lang.get('土地类型')}}&nbsp;&nbsp;
+			<span v-if="showType === constType.landtype">{{$lang.get('类型')}}</span>
+			<span v-else>{{$lang.get('属性')}}</span>
+			<el-button v-show="showType === constType.attribute" type="text"
+			@click="showType = constType.landtype" style="float: right;">{{$lang.get('返回')}}&nbsp;&nbsp;{{$lang.get('类型')}}</el-button>
+			<el-button v-show="showType !== constType.attribute" type="text"
+			@click="dialogVisible = false" style="float: right;">{{$lang.get('返回')}}</el-button>
 		</div>
 		<div v-show="showType === constType.landtype">
 			<div v-for="(formOpt,ind) in landTypeSelections" :key="ind">
@@ -30,7 +32,7 @@
 						:key="oind" style="margin-right: 5px;margin-top: 5px;" @click="selectAttribute(formOpt,opt)"
 						:type="opt.id === landMsg.attributeValues[formOpt.landAttrId] ? 'success' : ''">{{opt[`value${lang}`]}}</el-tag>
 			</div>
-			<el-button @click="selectOver" style="width: 100%;">提交</el-button>
+			<el-button @click="selectOver" style="width: 100%;">{{$lang.get('提交')}}</el-button>
 		</div>
 	</el-dialog>
 </template>

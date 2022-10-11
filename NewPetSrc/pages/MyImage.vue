@@ -1,6 +1,6 @@
 <template>
 	<div :style="styles" :class="classes">
-		<el-button type="text" v-if="!url" @click="updateImage">查看图片</el-button>
+		<el-button type="text" v-if="!url" @click="updateImage">{{$lang.get('查看图片')}}</el-button>
 		<img v-else :src="url" alt="" style="width: 100%;height: 100%;">
 	</div>
 </template>

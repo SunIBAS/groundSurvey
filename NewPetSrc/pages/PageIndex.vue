@@ -1,11 +1,12 @@
 <template>
 	<div>
 		<AddOnePointDetail ref="aopd"></AddOnePointDetail>
+		<RecordList @loadMainRecordById="loadMainRecordById" ref="recordList"></RecordList>
+		<ChangeMap ref="cmap"></ChangeMap>
 		<div :class="marker_class" :style="marker_css" v-show="marker_click">
-			<el-button type="text" @click="addOnePointDetail()">创建记录</el-button>
+			<el-button type="text" @click="addOnePointDetail()">{{$lang.get('创建记录')}}</el-button>
 			<i class="el-icon-close" style="line-height: 40px;float: right;padding-right: 5px;" @click="removeMarker"></i>
 		</div>
-		<ChangeMap ref="cmap"></ChangeMap>
 
 		<div class="right-top" @click="toCurrentLocation">
 			<!--转到当前位置-->
@@ -17,22 +18,24 @@
 			<i class="el-icon-s-grid"></i>
 		</div>
 
-		<RecordList @loadMainRecordById="loadMainRecordById" ref="recordList"></RecordList>
+		<Setting/>
+
 	</div>
 </template>
 
 <script>
 import ChangeMap from "./RecordList";
 // import {createInvestRecord} from "../../src/api/selection";
-import {getPosition} from "../../src/utils/getGeoLocation";
+import {getPosition} from "../utils/getGeoLocation";
 import {addMarker} from "../../src/utils/mapAction";
 import AddOnePointDetail from "./AddOnePointDetail";
 import RecordList from "./RecordList";
+import Setting from "./Setting";
 let marker = null;
 let latlng = null;
 export default {
 	name: "PageIndex",
-	components: {RecordList, AddOnePointDetail, ChangeMap},
+	components: {Setting, RecordList, AddOnePointDetail, ChangeMap},
 	props: {
 		ifr: {}
 	},
@@ -162,6 +165,7 @@ export default {
 	border-radius: 5px;
 }
 .right-bottom {
+	font-size: 30px;
 	line-height: 50px;
 	text-align: center;
 	position: fixed;

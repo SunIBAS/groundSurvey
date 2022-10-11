@@ -26,6 +26,8 @@ const dearError = msg => {
 };
 const request = (url,options,noWithToken) => {
     let loading = Loading.service({ fullscreen: true });
+    let emptyPromise = () => new Promise(s => s());
+
     if (!noWithToken) {
         if (!options) {
             options = {};
@@ -34,42 +36,49 @@ const request = (url,options,noWithToken) => {
             options.headers = {};
         }
         if (url !== loginUrl) {
-            options.headers.token = Storage.get_user_info();
+            emptyPromise = () => Storage.get_user_info().then(token => {
+                options.headers.token = token;
+                return token;
+            });
             options.headers.withcredentials = true;
         }
     }
-    return fetch(url,options || {}).then(_ => _.json()).then(ret => {
-        loading.close();
-        if (ret.code === 200) {
-            return ret.data;
-        } else {
-            // dearError(ret.msg || ret.error);
-            throw new Error(ret.msg || ret.error);
-            // toLogoutAndReload(url,ret);
-        }
-    }).catch(e => {
-        toLogoutAndReload(url,{code:500});
-        dearError(e.message);
-        loading.close();
+    return emptyPromise().then(() => {
+        return fetch(url,options || {}).then(_ => _.json()).then(ret => {
+            loading.close();
+            if (ret.code === 200) {
+                return ret.data;
+            } else {
+                // dearError(ret.msg || ret.error);
+                throw new Error(ret.msg || ret.error);
+                // toLogoutAndReload(url,ret);
+            }
+        }).catch(e => {
+            toLogoutAndReload(url,{code:500});
+            dearError(e.message);
+            loading.close();
+        });
     });
 }
 const requestImage = url => {
     let loading = Loading.service({ fullscreen: true });
     url  = `${window.config.baseApiUrl}${url}`;
     console.log(`[img]:${url}`)
-    return fetch(url,{
-        // responseType: 'blob',
-        method: 'get',
-        headers: {
-            token : Storage.get_user_info(),
-            withcredentials : true,
-        }
-    }).then(_=>_.blob()).then(_ => {
-        loading.close();
-        return URL.createObjectURL(_);
-    }).catch(e => {
-        dearError(e.message);
-        loading.close();
+    return Storage.get_user_info().then(token => {
+        return fetch(url,{
+            // responseType: 'blob',
+            method: 'get',
+            headers: {
+                token : token,
+                withcredentials : true,
+            }
+        }).then(_=>_.blob()).then(_ => {
+            loading.close();
+            return URL.createObjectURL(_);
+        }).catch(e => {
+            dearError(e.message);
+            loading.close();
+        });
     });
 }
 const requestPostWithData = (url,data,method,noWithToken) => {

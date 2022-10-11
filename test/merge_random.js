@@ -32,6 +32,7 @@ const seqs = {
 }
 
 const build_merge = (arr,seq) => {
+    if (!seq) return [];
     let a = [];
     seq.forEach(_ => a.push(-1));
     arr.forEach((_,ind) => a[seq.indexOf(_.key)] = ind);
@@ -43,7 +44,7 @@ const build_merge = (arr,seq) => {
     return a.map(_ => path.join(tifPath,arr[_].fname));
 };
 
-let txts = [`echo #PackageR.exe RunRAsTplTiff calc ${p}_packager.txt`,`mkdir ${merge_path}`];
+let txts = [`@echo off`,`echo #PackageR.exe RunRAsTplTiff calc ${p}_packager.txt`,`mkdir ${merge_path}`];
 for (let i in tifs) {
     let writeLine = [];
     let ps = build_merge(tifs[i],seqs[p]);
@@ -53,7 +54,7 @@ for (let i in tifs) {
         return `echo read b${ind} ${p} >> merge.txt`;
     }));
     txts.push(`echo write ${writeLine.join('#')} ${merge_path}\\${i}.tif >> merge.txt`);
-    txts.push(`PackageR.exe RunRAsTplTiff calc merge.txt`);
+    txts.push(`if not exist "${merge_path}\\${i}.tif" PackageR.exe RunRAsTplTiff calc merge.txt`);
     txts.push('echo ##################################################################')
     txts.push('echo ##################################################################')
     txts.push('echo ##################################################################')

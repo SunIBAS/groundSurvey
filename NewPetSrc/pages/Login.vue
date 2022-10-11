@@ -1,26 +1,29 @@
 <template>
 	<div class="background">
+		<Setting></Setting>
 		<el-row :gutter="10">
 			<el-col :xs="1" :sm="3" :md="8" :lg="8" :xl="9">&nbsp;</el-col>
 			<el-col :xs="22" :sm="18" :md="8" :lg="8" :xl="6"
 					class="login-form">
 				<el-form ref="form" :model="form" style="padding: 10px;box-sizing: border-box;">
-					<el-form-item label="用户名">
+					<el-form-item :label="$lang.get('用户名')">
 						<el-input v-model="form.username"></el-input>
 					</el-form-item>
-					<el-form-item label="密码">
+					<el-form-item :label="$lang.get('密码')">
 						<el-input v-model="form.password"></el-input>
 					</el-form-item>
-					<el-form-item label="确认密码" v-show="type==='register'">
+					<el-form-item :label="$lang.get('确认密码')" v-show="type==='register'">
 						<el-input v-model="form.rePassword"></el-input>
 					</el-form-item>
 					<el-form-item v-show="type === 'login'">
-						<el-button type="primary" @click="toLogin">登录</el-button>
-						<el-button type="text" style="float:right;" @click="type='register'"><i class="el-icon-right"></i>注册</el-button>
+						<el-button type="primary" @click="toLogin">{{$lang.get('登录')}}</el-button>
+						<el-button v-show="$addin.hbuilder" type="primary" @click="toLogin">{{$lang.get('离线登录')}}</el-button>
+						<el-button type="text" style="float:right;" @click="type='register'"><i class="el-icon-right">
+						</i>{{$lang.get('注册')}}</el-button>
 					</el-form-item>
 					<el-form-item v-show="type === 'register'">
-						<el-button type="primary" @click="register">注册</el-button>
-						<el-button type="text" style="float:right;" @click="type='login'"><i class="el-icon-right"></i>登录</el-button>
+						<el-button type="primary" @click="register">{{$lang.get('注册')}}</el-button>
+						<el-button type="text" style="float:right;" @click="type='login'"><i class="el-icon-right"></i>{{$lang.get('登录')}}</el-button>
 					</el-form-item>
 				</el-form>
 			</el-col>
@@ -37,9 +40,11 @@ import {
 import {
 	Storage
 } from "../utils/storage";
+import Setting from "./Setting";
 
 export default {
 	name: "Login",
+	components: {Setting},
 	data() {
 		return {
 			type: 'login',

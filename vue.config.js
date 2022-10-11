@@ -1,5 +1,9 @@
 module.exports = {
+    publicPath: './',
+    outputDir: 'hbuilder-app/dist',
+    productionSourceMap: true,
     configureWebpack: {
+        devtool: 'source-map',
         devServer: {
             disableHostCheck: true,
             open: false,
@@ -29,7 +33,6 @@ module.exports = {
         //     chunks: ['chunk-vendors', 'chunk-common', 'manager']
         // },
     },
-    publicPath: './',
     filenameHashing: true,
     devServer: {
         host: '172.20.109.222',

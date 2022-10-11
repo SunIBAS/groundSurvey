@@ -21,15 +21,16 @@ export default {
 		}
 	},
 	mounted() {
-		let userinfo = Storage.get_user_info();
-		if (userinfo) {
-			this.comp = 'App';
-			window.onbeforeunload = function() {
-				return 'really?';
+		Storage.get_user_info().then(userinfo => {
+			if (userinfo) {
+				this.comp = 'App';
+				window.onbeforeunload = function() {
+					return 'really?';
+				}
+			} else {
+				this.comp = 'Login';
 			}
-		} else {
-			this.comp = 'Login';
-		}
+		});
 	}
 }
 </script>

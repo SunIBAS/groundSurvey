@@ -7,7 +7,7 @@
 		ref="mapDialog"
 		:fullscreen="dialogFullscreen"
 		:custom-class="dialogTitleClass"
-		title="更换底图"
+		:title=$lang.get("更换底图")
 		:visible.sync="dialogBasemapVisible"
 		:width="dialogWidth">
 		<el-row :gutter="20">

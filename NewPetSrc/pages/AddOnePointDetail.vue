@@ -273,14 +273,14 @@ export default {
 	methods: {
 		deleteRecord() {
 			this.$confirm(this.$lang.get('此操作将永久删除该记录, 是否继续?'), this.$lang.get('提示'), {
-				confirmButtonText: '确定',
-				cancelButtonText: '取消',
+				confirmButtonText: this.$lang.get('确定'),
+				cancelButtonText: this.$lang.get('取消'),
 				type: 'warning'
 			}).then(() => {
 				DeleteRecordById(this.formData.id).then(() => {
 					this.$message({
 						type: 'success',
-						message: '删除成功!'
+						message: this.$lang.get('删除成功!')
 					});
 					this.edit = false;
 					this.closeAndSave();
@@ -288,7 +288,7 @@ export default {
 			}).catch(() => {
 				this.$message({
 					type: 'info',
-					message: '已取消删除'
+					message: this.$lang.get('已取消删除')
 				});
 			});
 		},
@@ -446,7 +446,7 @@ export default {
 			}
 			return UpdateRecord(obj).then(() => {
 				this.$message({
-					message: '提交成功',
+					message: this.$lang.get('提交成功'),
 					type: 'success'
 				});
 				return '';

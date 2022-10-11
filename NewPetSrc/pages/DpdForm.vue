@@ -3,7 +3,7 @@
 		<el-form-item v-for="formItem in formItems" :label="formItem.label" :key="formItem.name">
 			<el-select style="width: 100%;" v-model="formItem.value"
 					   @change="updateChange" :disabled="!edit"
-					   clearable placeholder="请选择">
+					   clearable :placeholder='$lang.get("请选择")'>
 				<el-option
 					v-for="item in formItem.options"
 					:key="item.id"
@@ -12,7 +12,7 @@
 				</el-option>
 			</el-select>
 		</el-form-item>
-		<el-form-item label="图片">
+		<el-form-item :label="$lang.get('图片')">
 			<el-upload v-show="edit"
 			    accept="image/*"
 				class="avatar-uploader"

@@ -6,23 +6,47 @@ import EmptyApp from "./EmptyApp";
 // import EmptyApp from "./pages/AddOnePointDetail";
 // import EmptyApp from "../src/pages/PC/Records/SoilMoistureCollRecord";
 import {Lang} from "./utils/Lang";
+import { Message,MessageType } from "./utils/Message";
 
+// 定义 hbuilder 为 true 时可以离线操作，为 false 时无法离线操作，如果 hbuilder 为 true 则 请求缓存
 Vue.prototype.$addin = {
   $map: null,
   $leafletAPI: null,
+  hbuilder: false,
+  offline: false,
 };
+window.hubilder = false;
+window.offline = false;
 Vue.use(ElementUI);
-Lang(Vue);
-let initVue = () => {
-  let $vue = new Vue({
-    el: '#app',
-    render: h => h(EmptyApp)
+
+function initVue_() {
+  Lang(Vue).then(() => {
+    let initVue = () => {
+      let $vue = new Vue({
+        el: '#app',
+        render: h => h(EmptyApp),
+      });
+      $vue.$lang.setVueInst($vue);
+    };
+    let id = setInterval(() => {
+      if (typeof window.config === "object") {
+        initVue();
+        clearInterval(id);
+      }
+    },500);
   });
-  $vue.$lang.setVueInst($vue);
-};
-let id = setInterval(() => {
-  if (typeof window.config === "object") {
-    initVue();
-    clearInterval(id);
-  }
-},500);
+}
+
+if (window !== window.parent) {
+  Message(MessageType.xid).then(({data}) => {
+    if (data === 'fawegaij;ofa;efknagoijaoeifjaoiwnfoaijgoiawe;ofnaweofiajwoiga;woeina;woifjaw;oifjawe') {
+      Vue.prototype.$addin.hbuilder = true;
+      window.hbuilder = true;
+    }
+    initVue_();
+  })
+} else {
+  window.hbuilder = false;
+  initVue_();
+}
+

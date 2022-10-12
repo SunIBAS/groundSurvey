@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title></title>
+	<script src='./js/jquery.min.js'></script>
+    <script src="./js/utils.js"></script>
+<!--    <script src="./js/TmpStorage.js"></script>-->
+    <script src="./js/Message.js"></script>
+    <script type="text/javascript">
+		const plusReady = function() {
+		    window.openWindow();
+		}
+
+		if(window.plus){
+			plusReady();
+		}else{
+			document.addEventListener('plusready',plusReady,false);
+		}
+    </script>
+    <style>
+        iframe {
+            width: 100vw;
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+    </style>
+</head>
+<body style="margin: 0;">
+<iframe id="web" src="" frameborder="0"></iframe>
+<!--<button onclick="openWindow()">打开窗口</button>-->
+</body>
+<script>
+    window.__x__i__d__ = 'fawegaij;ofa;efknagoijaoeifjaoiwnfoaijgoiawe;ofnaweofiajwoiga;woeina;woifjaw;oifjawe';
+
+    window.openWindow = function () {
+        let web = document.getElementById('web');
+        web.src = './dist/index.html';
+        // web.src = 'https://172.20.109.222:8081/';
+    }
+</script>
+</html>

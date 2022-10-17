@@ -11,8 +11,30 @@
         }
     }
 
+    var db = {
+        _db: new Database(),
+        record: new RecordApi(),
+        image: new ImageApi(),
+        imageRecord: new ImageRecordApi(),
+        otherRecord: new OtherRecordApi(),
+    };
+    db.image.setImageRecordApi(db.imageRecord);
+    const _tableNameApiMap = {
+        record: 'record',
+        other: 'otherRecord',
+        image: 'image',
+    };
+    // {
+    //      table: '',
+    //      method: '',
+    //      data: {}
+    // }
+    function dearDbMessage(content) {
+        return db[_tableNameApiMap[content.table]][content.method](content.data);
+    }
+
     window.addEventListener('message', function (e) {
-        // msg.data = {
+        // e.data = {
         //     type: '',
         //     content: {},
         //     id: '',
@@ -44,6 +66,36 @@
                 }, function (err) {
                     ret.error = err.message;
                     e.source.postMessage(ret,"*");
+                });
+                break;
+            case "db":
+                dearDbMessage(e.data.content).then(data => {
+                    e.source.postMessage({
+                        ...ret,
+                        error: '',
+                        data: data
+                    },"*");
+                }).catch(err => {
+                    e.source.postMessage({
+                        ...ret,
+                        error: err,
+                        data: ''
+                    },"*");
+                });;
+                break;
+            case "dbinit":
+                db._db.init().then(() => {
+                    e.source.postMessage({
+                        ...ret,
+                        error: '',
+                        data: ''
+                    },"*");
+                }).catch(err => {
+                    e.source.postMessage({
+                        ...ret,
+                        error: err,
+                        data: ''
+                    },"*");
                 });
                 break;
             default:

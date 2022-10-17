@@ -150,17 +150,20 @@
 
 <script>
 import {
+	GetRecord,
+	UpdateRecord,
 	CreateRecord,
+	DeleteRecordById,
 	GetCropType,
 	GetDiseaseType,
 	GetSeverity,
 	GetPestType,
+} from './../api/UpperApi';
+import {
+	// CreateRecord,
 	UploadDroughtImage,
 	UploadDiseaseImage,
 	UploadPestImage,
-	GetRecord,
-	UpdateRecord,
-	DeleteRecordById,
 } from "../api/apis";
 import {
 	formatLandMsg

@@ -6,7 +6,9 @@ const tables = {
     image: 'create table if not exists image(id varchar(20) PRIMARY KEY not null,imageUrl varchar (30) not null,recordId varchar(30) not null,imgBase64 text)',
     record: 'create table if not exists record(id varchar(20) Primary key not null,content varchar(200))',
     // image 和 record 连表查询
-    imageRecord: 'create table if not exists imageRecord(id varchar(20) Primary key not null,imageId varchar(20),recordId varchar(20),imageType varchar(4))'
+    imageRecord: 'create table if not exists imageRecord(id varchar(20) Primary key not null,imageId varchar(20),recordId varchar(20),imageType varchar(4))',
+    // 用于存储将被不断覆盖更新的内容
+    other: `create table if not exists other(id varchar(20) not null,hash varchar(200),content text)`
 };
 const createId = (function () {
     let ind = 0;
@@ -92,7 +94,23 @@ class Database {
     }
     init() {
         return new Promise((s,f) => {
-            plus.sqlite.openDatabase(this.option,s,f);
+            plus.sqlite.openDatabase({
+                ...this.option,
+                success() {
+                    s();
+                },
+                fail(e) {
+                    f(e);
+                }
+            });
+        }).then(() => {
+            return this.createTable();
+        }).catch(e => {
+            if (e.code.toString() === "-1402") {
+                return this.createTable();
+            } else {
+                throw e;
+            }
         });
     }
     createTable() {
@@ -106,10 +124,14 @@ class Database {
     }
     insert(sql) {
         return new Promise((s,f) => {
-            plus.sqlite.executeSql({
+            return plus.sqlite.executeSql({
                 name: this.option.name,
                 sql: sql,
-                s,f,
+                success() {
+                    s();
+                },fail(e) {
+                    f(e);
+                },
             });
         });
     }
@@ -124,11 +146,11 @@ class Api {
             return `select * from ${tbname} limit ${pageSize} offset ${pageSize * (page - 1)};`;
         },
         selectById(tbname,id) {
-            return `select * from ${tbname} where id=${id};`;
+            return `select * from ${tbname} where id="${id}";`;
         },
         insertOrUpdate(tbname,id,obj) {
-            let fields = [];
-            let values = [];
+            let fields = ["id"];
+            let values = [id];
             let sql = `insert or replace into ${tbname}(#{fields}) values("#{values}");`;
             for (let i in obj) {
                 fields.push(i);
@@ -140,6 +162,7 @@ class Api {
             }
             sql = sql.replace(`#{fields}`,fields.join(','));
             sql = sql.replace(`#{values}`,values.join('","'));
+            console.log(`[select Sql] : ${sql}`);
             return sql;
         },
         delete(tbname,id,fieldName) {
@@ -159,6 +182,10 @@ class Api {
         } else {
             sql = Api.buildSql.selectAll(this.tbname);
         }
+        console.log(sql);
+        return this.selectSqlExecute(sql);
+    }
+    selectSqlExecute(sql) {
         return new Promise((s,f) => {
             plus.sqlite.selectSql({
                 name: dbName,
@@ -177,10 +204,13 @@ class Api {
             });
         });
     }
+    getCounts() {
+        return this.selectSqlExecute(`select count(*) total from ${this.tbname}`).then(_ => _[0].total);
+    }
     executeSql(sql) {
         return new Promise((s,f) => {
             plus.sqlite.executeSql({
-                name: 'first',
+                name: dbName,
                 sql: sql,
                 success: function(e){
                     s(e);
@@ -192,7 +222,7 @@ class Api {
         });
     }
     insertSql(id,obj) {
-        return this.executeSql(Api.buildSql.insertOrUpdate(id,obj));
+        return this.executeSql(Api.buildSql.insertOrUpdate(this.tbname,id,obj));
     }
     updateSql(id,obj) {
         return this.insertSql(id,obj);
@@ -213,13 +243,35 @@ class RecordApi extends Api {
     constructor() {
         super("record");
     }
-    createOrUpdateRecord(id,obj) {
+    createOrUpdateRecord({id, obj}) {
         if (!id) {
             id = createId();
         }
-        return this.insertSql(id,obj);
+        return this.insertSql(id,obj).then(() => {
+            return id;
+        });
     }
-    delete(id) {
+    getList({pageNo, pageSize}) {
+        return this.getCounts().then(total => {
+            if (total === 0) {
+                return {
+                    total: 0,
+                    data: []
+                }
+            } else {
+                return this.selectSql(null,pageNo,pageSize).then(data => {
+                    return {
+                        data,
+                        total
+                    }
+                });
+            }
+        })
+    }
+    getRecord({id}) {
+        return this.selectSql(id).then(e => e[0]);
+    }
+    delete({id}) {
         return this.deleteSql(id);
     }
 }
@@ -230,7 +282,7 @@ class ImageApi extends Api {
         this.imageRecordApi = null;
     }
     setImageRecordApi(api) {
-        this.imageRecordApi = api;
+        return this.imageRecordApi = api;
     }
     createImage(recordId,imgBase64,imageType) {
         // id,imageUrl
@@ -282,5 +334,33 @@ class ImageRecordApi extends Api {
         } else {
             return ApiFail();
         }
+    }
+}
+
+class OtherRecordApi extends Api {
+    constructor() {
+        super('other');
+    }
+    insert({id,content}) {
+        return this.insertSql(id, {
+            content: content,
+            hash: sha1(content),
+        });
+    }
+    select({id}) {
+        return this.selectSql(id).then(data => {
+            if (data.length) {
+                return data[0];
+            } else {
+                let ret = DefaultRequest[id];
+                if (ret) {
+                    return ret;
+                } else {
+                    if (id.startsWith('GetLandAttribute')) {
+                        return DefaultRequest.DefaultGetLandAttribute;
+                    }
+                }
+            }
+        });
     }
 }

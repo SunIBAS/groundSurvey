@@ -1,7 +1,9 @@
+// import {
+// } from "../api/apis";
 import {
     GetLandType,
     GetLandAttribute
-} from "../api/apis";
+} from './../api/UpperApi';
 
 // landMsg: {
 //     landTypeId: -1,

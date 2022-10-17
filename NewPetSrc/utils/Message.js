@@ -1,7 +1,9 @@
 export const MessageType = {
     xid: 'xid',
     tmpStorage: 'tmpStorage',
-    position: 'position'
+    position: 'position',
+    db: 'db',
+    dbinit: 'dbinit'
 }
 
 let createId = (function () {
@@ -42,3 +44,4 @@ export const Message = function (type,content) {
         },500);
     })
 };
+

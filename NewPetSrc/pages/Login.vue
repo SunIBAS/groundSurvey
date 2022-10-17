@@ -17,7 +17,7 @@
 					</el-form-item>
 					<el-form-item v-show="type === 'login'">
 						<el-button type="primary" @click="toLogin">{{$lang.get('登录')}}</el-button>
-						<el-button v-show="$addin.hbuilder" type="primary" @click="toLogin">{{$lang.get('离线登录')}}</el-button>
+						<el-button v-show="$addin.hbuilder" type="primary" @click="toLoginOffline">{{$lang.get('离线使用')}}</el-button>
 						<el-button type="text" style="float:right;" @click="type='register'"><i class="el-icon-right">
 						</i>{{$lang.get('注册')}}</el-button>
 					</el-form-item>
@@ -85,6 +85,11 @@ export default {
 					message: '密码不一致'
 				});
 			}
+		},
+		toLoginOffline() {
+			window.offline = true;
+			Storage.set_offline_user_token();
+			location.reload();
 		}
 	}
 }

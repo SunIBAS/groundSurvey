@@ -23,6 +23,16 @@ export default {
 	mounted() {
 		Storage.get_user_info().then(userinfo => {
 			if (userinfo) {
+				if (Storage.check_offline_user_token(userinfo)) {
+					if (window.hbuilder) {
+						window.offline = true;
+						this.$addin.offline = true;
+					} else {
+						// logout();
+						Storage.set_user_info('');
+						location.reload();
+					}
+				}
 				this.comp = 'App';
 				window.onbeforeunload = function() {
 					return 'really?';

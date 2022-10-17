@@ -42,8 +42,16 @@ if (window !== window.parent) {
     if (data === 'fawegaij;ofa;efknagoijaoeifjaoiwnfoaijgoiawe;ofnaweofiajwoiga;woeina;woifjaw;oifjawe') {
       Vue.prototype.$addin.hbuilder = true;
       window.hbuilder = true;
+      Message(MessageType.dbinit).then(obj => {
+        if (obj.error) {
+          alert(`error code = ${obj.error.code}\nmessage = ${obj.error.message}`);
+        } else {
+          initVue_();
+        }
+      })
+    } else {
+      initVue_();
     }
-    initVue_();
   })
 } else {
   window.hbuilder = false;

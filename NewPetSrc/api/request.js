@@ -5,7 +5,12 @@ import {
 } from "../utils/storage";
 
 const loginUrl = `${window.config.baseApiUrl}/user/login`;
+let isReload = false;
 export const toLogoutAndReload = (url,ret) => {
+    if (isReload) {
+        return;
+    }
+    isReload = true;
     // todo 这里比较粗暴，因为这里本来不应该是这样子的
     if (url === loginUrl) {
         return;

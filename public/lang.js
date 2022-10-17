@@ -203,8 +203,12 @@ window.lang = {
 		Chs: '设置',
 		En: 'Setting'
 	},
-	'离线登录': {
-    	Chs: '离线登录',
-		En: 'Offline Login'
+	'离线使用': {
+    	Chs: '离线使用',
+		En: 'Offline'
+	},
+	'离线记录': {
+    	Chs: '离线记录',
+		En: 'Offline Record'
 	}
 };

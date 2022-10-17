@@ -28,7 +28,10 @@ export const GetRecord = id => {
 };
 const _GetRecordList = `${window.config.baseApiUrl}/record/page-get`;
 export const GetRecordList = (pageNo,pageSize) => {
-    return request(`${_GetRecordList}?pageNo=${pageNo}&pageSize=${pageSize}`);
+    return request(`${_GetRecordList}?pageNo=${pageNo}&pageSize=${pageSize}`).then(data => {
+        debugger
+        return data;
+    });
 }
 const _DeleteRecordById = `${window.config.baseApiUrl}/record/delete`;
 export const DeleteRecordById = id => request(`${_DeleteRecordById}?id=${id}`,{method: 'DELETE'});
@@ -53,6 +56,8 @@ export const GetLandAttribute = (landTypeId) => {
         method: 'get',
     });
 };
+
+window.GetLandAttribute = GetLandAttribute;
 
 const _CropType = `${window.config.baseApiUrl}/record/get/crop/type`
 export const GetCropType = () => {

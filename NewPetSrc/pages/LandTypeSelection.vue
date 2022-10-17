@@ -41,7 +41,9 @@
 import {
 	GetLandAttribute,
 	GetLandType
-} from "./../api/apis";
+} from './../api/UpperApi';
+// import {
+// } from "./../api/apis";
 const constType = {
 	attribute: 'attribute',
 	attributeValue: 'attributeValue',

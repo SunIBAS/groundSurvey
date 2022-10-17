@@ -55,6 +55,7 @@ function updateStorage() {
 const Storage = new (class  {
     constructor() {
         this.user_info_id = `_user_info_id_`;
+        this.offline_user_token = '_offline_token_';
         this._kv = {};
     }
 
@@ -99,6 +100,13 @@ const Storage = new (class  {
         } else {
             this._set_info_to_sessionStorage(this.user_info_id,value);
         }
+    }
+
+    set_offline_user_token() {
+        this.set_user_info(this.offline_user_token);
+    }
+    check_offline_user_token(utk) {
+        return utk === this.offline_user_token;
     }
 });
 

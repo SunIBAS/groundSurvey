@@ -11,6 +11,21 @@ function readFileAsDataURL(file) {
     })
 }
 
+export const Obj2Str = obj => {
+    if (typeof obj === "undefined") {
+        return obj;
+    } else {
+        return JSON.stringify(obj).replace(/"/g,'=-=-=');
+    }
+};
+export const Str2Obj = str => {
+    if (str) {
+        return JSON.parse(str.replace(/=-=-=/g,'"'));
+    } else {
+        return {};
+    }
+}
+
 export {
     readFileAsDataURL
 }

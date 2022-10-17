@@ -5,7 +5,10 @@
 		:modal="false"
 		:show-close="true">
 		<div slot="title">
-			<el-button type="text" @click="refreshRecords()">{{$lang.get('刷新')}}</el-button>
+			<el-button type="primary" v-if="offline"
+					   @click="refreshRecords()">{{$lang.get('刷新')}}</el-button>
+			<el-button type="success" v-show="hbuilder"
+					   @click="refreshRecords()">{{$lang.get('离线记录')}}</el-button>
 		</div>
 		<template v-for="(l,ind) in currentList">
 			<el-card class="box-card" :key="ind" style="margin-bottom: 10px;">
@@ -42,12 +45,21 @@
 
 <script>
 import {
-	GetRecordList,
+	// GetRecordList,
 	DeleteRecordById,
+} from './../api/UpperApi';
+import {
+	GetRecordList as PureGetRecordList,
+	// DeleteRecordById,
 } from "./../api/apis";
+import {
+	GetRecordList as NativeGetRecordList,
+} from "./../api/nativeApi";
 import {
 	Ts2Sting
 } from "../../src/utils/time";
+
+let GetRecordList = PureGetRecordList;
 
 export default {
 	name: "RecordList",
@@ -58,6 +70,8 @@ export default {
 			page: 1,
 			pageSize: 10,
 			currentList: [],
+			hbuilder: false,
+			offline : false,
 		}
 	},
 	methods: {
@@ -72,9 +86,9 @@ export default {
 				this.currentList.splice(0,this.currentList.length,...data.map(_ => {
 					return {
 						..._,
-						updateTime: _.updateTime.split('.000+')[0],
-						surveyTime: Ts2Sting(_.surveyTime),//(_.surveyTime || '+').split('+')[0],
-						createTime: _.createTime.split('.000+')[0],
+						updateTime: _.updateTime ? _.updateTime.split('.000+')[0] : '',
+						surveyTime: _.surveyTime ? Ts2Sting(_.surveyTime) : '',//(_.surveyTime || '+').split('+')[0],
+						createTime: _.createTime ? _.createTime.split('.000+')[0] : '',
 					}
 				}));
 			})
@@ -104,6 +118,11 @@ export default {
 		}
 	},
 	mounted() {
+		this.hbuilder = window.hbuilder;
+		if (window.hbuilder && window.offline) {
+			GetRecordList = NativeGetRecordList;
+			this.offline = true;
+		}
 		this.getRecords();
 		window.$RecordList = this;
 	}

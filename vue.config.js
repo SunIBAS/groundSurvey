@@ -3,7 +3,8 @@ module.exports = {
     outputDir: 'hbuilder-app/dist',
     productionSourceMap: true,
     configureWebpack: {
-        devtool: 'source-map',
+        devtool: "cheap-module-source-map",
+        // devtool: 'source-map',
         devServer: {
             disableHostCheck: true,
             open: false,

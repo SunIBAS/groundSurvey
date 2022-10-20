@@ -123,19 +123,19 @@
 			</div>
 			<div style="padding: 10px;margin-top: 44px;">
 				<!-- disease 病害 -->
-				<DpdForm :edit="edit" v-show="drawerSetting.type === drawerTypes.disease"
+				<DpdForm :edit="edit" :offline="offline" v-show="drawerSetting.type === drawerTypes.disease"
 						 :drawer-type="drawerTypes.disease"
 						 :ref="`dpd_${drawerTypes.disease}`" :record-id="formData.id"
 						 @updateChange="obj => updateChange(obj,drawerTypes.disease)"
 						 :form-items="dpdForm[drawerTypes.disease]"></DpdForm>
 
-				<DpdForm :edit="edit" v-show="drawerSetting.type === drawerTypes.pest"
+				<DpdForm :edit="edit" :offline="offline" v-show="drawerSetting.type === drawerTypes.pest"
 						 :drawer-type="drawerTypes.pest"
 						 :ref="`dpd_${drawerTypes.pest}`" :record-id="formData.id"
 						 @updateChange="obj => updateChange(obj,drawerTypes.pest)"
 						 :form-items="dpdForm[drawerTypes.pest]"></DpdForm>
 
-				<DpdForm :edit="edit" v-show="drawerSetting.type === drawerTypes.drought"
+				<DpdForm :edit="edit" :offline="offline" v-show="drawerSetting.type === drawerTypes.drought"
 						 :drawer-type="drawerTypes.drought"
 						 :ref="`dpd_${drawerTypes.drought}`" :record-id="formData.id"
 						 @updateChange="obj => updateChange(obj,drawerTypes.drought)"
@@ -158,19 +158,23 @@ import {
 	GetDiseaseType,
 	GetSeverity,
 	GetPestType,
-} from './../api/UpperApi';
-import {
-	// CreateRecord,
+	UploadImage,
 	UploadDroughtImage,
 	UploadDiseaseImage,
 	UploadPestImage,
+} from './../api/UpperApi';
+import {
+// 	// CreateRecord,
+// 	UploadDroughtImage,
+// 	UploadDiseaseImage,
+// 	UploadPestImage,
+	Dirs,
 } from "../api/apis";
 import {
 	formatLandMsg
 } from "../utils/formatLandMsg";
 import LandTypeSelection from "./LandTypeSelection";
 import {readFileAsDataURL} from "../utils/htmlUtils";
-import {Dirs, UploadImage} from "../api/apis";
 import DpdForm from "./DpdForm";
 import MyCard from "./MyCard";
 const drawerTypes = {
@@ -271,6 +275,8 @@ export default {
 			droughtSeverity: [],
 			cropTypes: [],
 			pestTypeOptions: [],
+
+			offline: false,
 		}
 	},
 	methods: {
@@ -410,11 +416,13 @@ export default {
 			this.formData.landMsg = lm;
 			this.updateRecord();
 		},// todo
-		handleAvatarSuccess(type,response) {
+		// handleAvatarSuccess(type,response) {
+		handleAvatarSuccess(type,file,offline) {
 			// console.log(response, file, fileList)
-			return UploadImage(response.raw,Dirs[type]).then((ret) => {
-				return UploadImageMethod[type](this.formData.id,ret).then(() => {
-					return readFileAsDataURL(response.raw).then(url => {
+			debugger
+			return UploadImage(file,Dirs[type],offline).then((ret) => {
+				return UploadImageMethod[type](this.formData.id,ret,offline).then(() => {
+					return readFileAsDataURL(file).then(url => {
 						return {
 							url: url,
 							file_path: ret,

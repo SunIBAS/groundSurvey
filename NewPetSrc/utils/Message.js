@@ -3,7 +3,8 @@ export const MessageType = {
     tmpStorage: 'tmpStorage',
     position: 'position',
     db: 'db',
-    dbinit: 'dbinit'
+    dbinit: 'dbinit',
+    image: 'image'
 }
 
 let createId = (function () {

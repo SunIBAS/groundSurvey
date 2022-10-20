@@ -29,7 +29,6 @@ export const GetRecord = id => {
 const _GetRecordList = `${window.config.baseApiUrl}/record/page-get`;
 export const GetRecordList = (pageNo,pageSize) => {
     return request(`${_GetRecordList}?pageNo=${pageNo}&pageSize=${pageSize}`).then(data => {
-        debugger
         return data;
     });
 }
@@ -103,10 +102,11 @@ const _Severity = `${window.config.baseApiUrl}/record/get/severity`
 export const GetSeverity = () => request(_Severity)
 
 // 上传图片
-const _Image = `${window.config.baseApiUrl}/record/img`
+const _Image = `${window.config.baseApiUrl}/record/img`;
+
 export const UploadImage = (img,dir) => {
     let formData = new FormData();
-    formData.append('file',img);
+    formData.append('file',img, 'a.jpg');
     return request(`${_Image}?dir=${dir}`,{
         headers: {
             // 'Content-Type': 'multipart/form-data',

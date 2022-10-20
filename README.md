@@ -9,3 +9,10 @@
 - 1.2 未登录，进入 User\Login 或 User\Register，注册登录之后 App
 
 - 2 在 App 中判断页面类型，如果是 pc 进入 PC\PCIndex，手机 进入 Mobile\MobileIndex
+
+
+#### apk todo
+
+- record 在非离线状态下的记录切换
+
+- 离线状态下的 图片 存储

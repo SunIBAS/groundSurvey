@@ -210,5 +210,9 @@ window.lang = {
 	'离线记录': {
     	Chs: '离线记录',
 		En: 'Offline Record'
+	},
+	'图片': {
+    	Chs: '图片',
+		En: 'Picture'
 	}
 };

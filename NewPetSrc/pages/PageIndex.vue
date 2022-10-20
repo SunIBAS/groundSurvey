@@ -71,10 +71,11 @@ export default {
 			marker = null;
 			this.marker_click = false;
 		},
-		loadMainRecordById(id,edit) {
+		loadMainRecordById(id,edit,offline) {
 			this.needToSetNewMarker = true;
 			this.$refs.recordList.dialogVisible = false;
 			// this.addOnePointDetail(id);
+			this.$refs.aopd.offline = offline;
 			this.$refs.aopd.newForm({id: id || null});
 			this.$refs.aopd.dialogVisible = true;
 			this.$refs.aopd.edit = edit;
@@ -83,6 +84,7 @@ export default {
 			this.marker_click = false;
 		},
 		addOnePointDetail(id) {
+			this.$refs.aopd.offline = this.$addin.offline;
 			this.$refs.aopd.edit = true;
 			this.$refs.aopd.newForm({...latlng,id: id || null});
 			this.$refs.aopd.dialogVisible = true;

@@ -5,10 +5,19 @@
 		:modal="false"
 		:show-close="true">
 		<div slot="title">
-			<el-button type="primary" v-if="offline"
+			<el-button type="primary"
 					   @click="refreshRecords()">{{$lang.get('刷新')}}</el-button>
-			<el-button type="success" v-show="hbuilder"
-					   @click="refreshRecords()">{{$lang.get('离线记录')}}</el-button>
+			<!-- hbuilder 表示是 app 端，onlyOffline 表示已经断网  --->
+			<!-- 只有 app 端的 非 断网 才能切换线上线下记录  --->
+			<el-button type="success" v-show="hbuilder && !onlyOffline && !offline"
+					   @click="changAsLocalRecord()">{{$lang.get('查看')}}&nbsp;&nbsp;&nbsp;{{$lang.get('离线记录')}}</el-button>
+			<el-button type="success" v-show="hbuilder && !onlyOffline && offline"
+					   @click="changAsOnlineRecord()">{{$lang.get('查看')}}&nbsp;&nbsp;&nbsp;{{$lang.get('线上记录')}}</el-button>
+			<div style="margin-top: 10px;">
+				{{$lang.get('历史记录')}}&nbsp;&nbsp;&nbsp;
+				<span style="color: #009688" v-show="!offline">{{$lang.get('来自服务器')}}</span>
+				<span style="color: #009688" v-show="offline">{{$lang.get('来自本地')}}</span>
+			</div>
 		</div>
 		<template v-for="(l,ind) in currentList">
 			<el-card class="box-card" :key="ind" style="margin-bottom: 10px;">
@@ -72,6 +81,7 @@ export default {
 			currentList: [],
 			hbuilder: false,
 			offline : false,
+			onlyOffline: false,
 		}
 	},
 	methods: {
@@ -114,7 +124,17 @@ export default {
 			});
 		},
 		loadMainRecordById(id,edit) {
-			this.$emit('loadMainRecordById',id,edit);
+			this.$emit('loadMainRecordById',id,edit,this.offline);
+		},
+		changAsLocalRecord() {
+			this.offline = true;
+			GetRecordList = NativeGetRecordList;
+			this.refreshRecords();
+		},
+		changAsOnlineRecord() {
+			this.offline = false;
+			GetRecordList = PureGetRecordList;
+			this.refreshRecords();
 		}
 	},
 	mounted() {
@@ -122,6 +142,7 @@ export default {
 		if (window.hbuilder && window.offline) {
 			GetRecordList = NativeGetRecordList;
 			this.offline = true;
+			this.onlyOffline = true;
 		}
 		this.getRecords();
 		window.$RecordList = this;

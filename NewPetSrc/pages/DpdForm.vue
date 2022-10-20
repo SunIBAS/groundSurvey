@@ -13,15 +13,7 @@
 			</el-select>
 		</el-form-item>
 		<el-form-item :label="$lang.get('图片')">
-			<el-upload v-show="edit"
-			    accept="image/*"
-				class="avatar-uploader"
-				:auto-upload="false"
-				action=""
-				:show-file-list="false"
-				:on-change="handleAvatarSuccess">
-				<i style="padding: 0 10px;" class="el-icon-plus avatar-uploader-icon"></i>
-			</el-upload>
+			<UploadImage v-show="edit" @handleAvatarSuccess="handleAvatarSuccess" :offline="offline"></UploadImage>
 			<div class="dpp-images" style="padding-top: 5px;">
 				<img v-for="(url,ind) in images.urls" :src="url" :key="ind" alt="">
 			</div>
@@ -34,11 +26,18 @@
 
 <script>
 import MyImage from "./MyImage";
+import UploadImage from "./UploadImage";
 
 export default {
 	name: "DpdForm",
-	components: {MyImage},
+	components: {UploadImage, MyImage},
 	props: {
+		offline: {
+			type: Boolean,
+			default() {
+				return false;
+			}
+		},
 		edit: {
 			type: Boolean,
 			require: true,
@@ -79,8 +78,8 @@ export default {
 				this.images.sources.splice(0,0,...images);
 			}
 		},
-		handleAvatarSuccess(response) {
-			this.$parent.$parent.handleAvatarSuccess(this.drawerType,response).then(({url/*,file_path*/}) => {
+		handleAvatarSuccess(file,offline) {
+			this.$parent.$parent.handleAvatarSuccess(this.drawerType,file,offline).then(({url/*,file_path*/}) => {
 				this.images.urls.push(url);
 				// 将 file_path 提交
 			});

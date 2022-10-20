@@ -71,6 +71,7 @@
                 });
                 break;
             case "db":
+                // alert(JSON.stringify(e.data));
                 dearDbMessage(e.data.content).then(data => {
                     e.source.postMessage({
                         ...ret,
@@ -78,7 +79,6 @@
                         data: data
                     },"*");
                 }).catch(err => {
-                    alert(err.message);
                     e.source.postMessage({
                         ...ret,
                         error: err,
@@ -94,7 +94,6 @@
                         data: ''
                     },"*");
                 }).catch(err => {
-                    alert(err.message);
                     e.source.postMessage({
                         ...ret,
                         error: err,
@@ -114,7 +113,6 @@
                         data: base64
                     },"*");
                 }).catch(err => {
-                    alert(err.message);
                     e.source.postMessage({
                         ...ret,
                         error: err,

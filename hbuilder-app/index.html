@@ -4,13 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title></title>
-	<script src='./js/jquery.min.js'></script>
-    <script src="./js/utils.js"></script>
-    <script src="./js/DefaultRequest.js"></script>
-<!--    <script src="./js/TmpStorage.js"></script>-->
-    <script src="./js/hash.js"></script>
-    <script src="./js/Database.js"></script>
-    <script src="./js/Message.js"></script>
+<!--	<script src='./js/jquery.min.js'></script>-->
+<!--    <script src="./js/SelectImage.js"></script>-->
+<!--    <script src="./js/FileStorage.js"></script>-->
+<!--    <script src="./js/utils.js"></script>-->
+<!--    <script src="./js/DefaultRequest.js"></script>-->
+<!--    <script src="./js/hash.js"></script>-->
+<!--    <script src="./js/Database.js"></script>-->
+<!--    <script src="./js/Message.js"></script>-->
+    <script src="https://172.20.109.222:8081/AppSource/loadSources.js"></script>
     <script type="text/javascript">
 		const plusReady = function() {
 		    window.openWindow();
@@ -33,6 +35,7 @@
     </style>
 </head>
 <body style="margin: 0;">
+	<!-- <button onclick="open_file()">测试</button> -->
 <iframe id="web" src="" frameborder="0"></iframe>
 <!--<button onclick="openWindow()">打开窗口</button>-->
 </body>
@@ -42,7 +45,27 @@
     window.openWindow = function () {
         let web = document.getElementById('web');
         // web.src = './dist/index.html';
-        web.src = 'https://172.20.109.222:8081/';
+        loadSources().then(() => {
+            web.src = 'https://172.20.109.222:8081/';
+        });
     }
+
+	function  tobase64(file){
+	    var reader = new FileReader();
+	    reader.readAsDataURL(file);
+	    reader.onloadend = function(e) {
+	        var newUrl = this.result;  console.log(newUrl);
+	    };
+	}
+	function open_file() {
+	    let inp = document.createElement('input');
+	    document.body.append(inp);
+	    inp.type = 'file';
+	    inp.onchange = function () {
+	        tobase64(inp.files[0]);
+	    }
+	    inp.click();
+	    window.inp = inp;
+	}
 </script>
 </html>

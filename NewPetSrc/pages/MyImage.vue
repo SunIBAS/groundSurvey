@@ -8,7 +8,10 @@
 <script>
 import {
 	requestImage
-} from "../api/request";
+} from "../api/UpperApi";
+// import {
+// 	requestImage
+// } from "../api/request";
 
 export default {
 	name: "MyImage",

@@ -4,15 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title></title>
-<!--	<script src='./js/jquery.min.js'></script>-->
-<!--    <script src="./js/SelectImage.js"></script>-->
-<!--    <script src="./js/FileStorage.js"></script>-->
-<!--    <script src="./js/utils.js"></script>-->
-<!--    <script src="./js/DefaultRequest.js"></script>-->
-<!--    <script src="./js/hash.js"></script>-->
-<!--    <script src="./js/Database.js"></script>-->
-<!--    <script src="./js/Message.js"></script>-->
-    <script src="https://172.20.109.222:8081/AppSource/loadSources.js"></script>
+	<script src='./js/jquery.min.js'></script>
+    <script src="./js/SelectImage.js"></script>
+    <script src="./js/FileStorage.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/DefaultRequest.js"></script>
+    <script src="./js/hash.js"></script>
+    <script src="./js/Database.js"></script>
+    <script src="./js/MapDatabase.js"></script>
+    <script src="./js/DownloadMap.js"></script>
+    <script src="./js/Message.js"></script>
+<!--    <script src="https://172.20.109.222:8081/AppSource/loadSources.js"></script>-->
     <script type="text/javascript">
 		const plusReady = function() {
 		    window.openWindow();
@@ -44,10 +46,11 @@
 
     window.openWindow = function () {
         let web = document.getElementById('web');
-        // web.src = './dist/index.html';
-        loadSources().then(() => {
-            web.src = 'https://172.20.109.222:8081/';
-        });
+        web.src = './dist/index.html';
+        // web.src = 'https://172.20.109.222:8081/';
+        // loadSources().then(() => {
+        //     web.src = 'https://172.20.109.222:8081/';
+        // });
     }
 
 	function  tobase64(file){

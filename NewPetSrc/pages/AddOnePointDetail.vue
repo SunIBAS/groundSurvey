@@ -11,6 +11,8 @@
 				<span v-if="edit">{{$lang.get('填写信息')}}</span>
 				<span v-else>{{$lang.get('信息')}}</span>
 				<span style="float: right;font-weight: bold;font-size: 14px;color: #686868;">
+					<span v-if="$addin.hbuilder && this.offline" @click="uploadToServer()">{{$lang.get('提交到服务器')}}</span>
+					&nbsp;&nbsp;&nbsp;&nbsp;
 					<span @click="deleteRecord()" >{{$lang.get('删除记录')}}</span>
 					&nbsp;&nbsp;&nbsp;&nbsp;
 					<span v-if="edit" @click="closeAndSave" style="float: right;font-weight: bold;font-size: 14px;color: #686868;">{{$lang.get('关闭并保存')}}</span>
@@ -162,6 +164,7 @@ import {
 	UploadDroughtImage,
 	UploadDiseaseImage,
 	UploadPestImage,
+	UploadImageFromLocal,
 } from './../api/UpperApi';
 import {
 // 	// CreateRecord,
@@ -177,6 +180,10 @@ import LandTypeSelection from "./LandTypeSelection";
 import {readFileAsDataURL} from "../utils/htmlUtils";
 import DpdForm from "./DpdForm";
 import MyCard from "./MyCard";
+import {
+	NUI
+} from "../utils/Message";
+
 const drawerTypes = {
 	disease: 'disease',
 	pest: 'pest',
@@ -431,7 +438,7 @@ export default {
 				});
 			});
 		},
-		updateRecord() {
+		updateRecord(id) {
 			let obj = {
 				// "createTime": "2022-09-09T02:04:00.464Z",
 				"cropType": this.formData.cropType,
@@ -439,7 +446,7 @@ export default {
 				"diseaseSeverity": this.formData.diseaseSeverity,
 				"diseaseType": this.formData.diseaseType,
 				"droughtSeverity": this.formData.droughtSeverity,
-				"id": this.formData.id,
+				"id": id || this.formData.id,
 				"landMsg": JSON.stringify({
 					landTypeId: this.formData.landMsg.landTypeId,
 					attributeValues: this.formData.landMsg.attributeValues,
@@ -477,6 +484,20 @@ export default {
 					updateOver();
 				});
 			}
+		},
+		uploadToServer() {
+			CreateRecord({
+				surveyTime: (new Date()).getTime(),
+			}).then(id => {
+				this.updateRecord(id).then(() => {
+					NUI.toast(this.$lang.get('成功创建记录，开始上传图片'));
+					// 上传图片
+					debugger
+					UploadImageFromLocal(tmpObj,id).then(() => {
+						NUI.toast(this.$lang.get('上传图片完成'));
+					});
+				});
+			});
 		}
 	},
 	watch: {

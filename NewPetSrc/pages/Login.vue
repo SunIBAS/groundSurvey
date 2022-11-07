@@ -41,6 +41,12 @@ import {
 	Storage
 } from "../utils/storage";
 import Setting from "./Setting";
+import {
+	TestNetwork
+} from "../api/apis";
+import {
+	NUI
+} from "../utils/Message";
 
 export default {
 	name: "Login",
@@ -90,6 +96,15 @@ export default {
 			window.offline = true;
 			Storage.set_offline_user_token();
 			location.reload();
+		}
+	},
+	mounted() {
+		if (window.hbuilder) {
+			TestNetwork().catch(() => {
+				NUI.toast('无法链接网络', {
+					verticalAlign: 'top'
+				});
+			})
 		}
 	}
 }

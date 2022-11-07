@@ -56,7 +56,7 @@ const parser = {
  * @param doPromiseReturn   如果需要对 promise 的结果进行处理，可以使用这个参数
  * @returns {Promise<unknown>}
  */
-const runPromiseByArrReturnPromise = (promise,arr,doPromiseReturn,catchFn,stopWhenCatch) => {
+var runPromiseByArrReturnPromise = (promise,arr,doPromiseReturn,catchFn,stopWhenCatch) => {
     let doing = false;
     doPromiseReturn = doPromiseReturn || (_=>_);
     return new Promise((s,f) => {
@@ -70,7 +70,6 @@ const runPromiseByArrReturnPromise = (promise,arr,doPromiseReturn,catchFn,stopWh
                             doPromiseReturn(o,id);
                             doing = false;
                         }).catch(e => {
-                            alert(e.message);
                             catchFn(e);
                             if (stopWhenCatch) {
                                 clearInterval(_id);
@@ -107,7 +106,6 @@ class Database {
         }).then(() => {
             return this.createTable();
         }).catch(e => {
-            alert(e.message);
             if (e.code.toString() === "-1402") {
                 return this.createTable();
             } else {

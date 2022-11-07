@@ -13,6 +13,9 @@
 								  :label="k.type">{{k.text}}</el-radio>
 					</el-radio-group>
 				</el-form-item>
+				<el-form-item label="离线地图 / Offline Map" v-show="$addin.hbuilder">
+					<el-button type="text" @click="openMapDownload">查看 / Show</el-button>
+				</el-form-item>
 				<el-form-item v-show="login">
 					<el-button style="width: 100%;" @click="logout">退出登录 / Logout</el-button>
 				</el-form-item>
@@ -58,6 +61,9 @@ export default {
 			setTimeout(() => {
 				location.reload();
 			},100);
+		},
+		openMapDownload() {
+			window.open_downloadDom();
 		}
 	},
 	watch: {

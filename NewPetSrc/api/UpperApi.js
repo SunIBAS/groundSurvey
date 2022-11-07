@@ -2,6 +2,7 @@ import * as PureApi from './apis'
 import * as NativeApi from './nativeApi'
 import {DbMessage, otherRecordIds} from "./nativeApi";
 import {
+    Base64ToJpegFile,
     Obj2Str, Str2Obj
 } from "../utils/htmlUtils";
 import {
@@ -111,4 +112,66 @@ export const requestImage = url => {
     } else {
         return ri(url);
     }
+}
+
+// 将本地的图片上传到服务器
+// tmpObj 是 AddOnePointDetail 总的 tmp 对象
+// tmpObj = {
+//     diease: [
+//         {
+//             id: '',
+//             imageUrl: '',
+//             recordId: ''
+//         }
+//     ],
+//      drought: [],
+//      pest: [],
+// }
+import {
+    Dirs
+} from "./apis";
+import {
+    runPromiseByArrReturnPromise
+} from "../utils/htmlUtils";
+import {
+    NUI
+} from "../utils/Message";
+
+const UploadImageMethod = {
+    [Dirs.disease]: UploadDiseaseImage,
+    [Dirs.pest]: UploadPestImage,
+    [Dirs.drought]: UploadDroughtImage,
+};
+export const UploadImageFromLocal = (tmpObj,recordId) => {
+    let images = [];
+    let count = 0;
+    for (let i in tmpObj) {
+        tmpObj[i].forEach(img => {
+            count++;
+            images.push({
+                type: i,
+                dir: Dirs[i],
+                localImageId: img.id,
+                localImageUrl: img.imgUrl,
+            });
+        });
+    }
+    if (count) {
+        NUI.toast(`总共(total) ${count} 图片(Picture(s)) 需要上传(should be upload)`);
+    }
+    let timer = 1;
+    return runPromiseByArrReturnPromise(imageOObj => {
+        return NativeApi.requestImage(imageOObj.localImageUrl).then(base64 => {
+            let binary = Base64ToJpegFile(base64);
+            PureApi.UploadImage(binary, imageOObj.dir).then(ret => {
+                return UploadImageMethod[imageOObj.type](recordId,ret).then(r => {
+                    NUI.toast(`已经完成${timer}张(${timer} picture(s) over)`,{
+                        duration: '0.2s'
+                    });
+                    timer++;
+                    return r;
+                });
+            });
+        });
+    },images,);
 }

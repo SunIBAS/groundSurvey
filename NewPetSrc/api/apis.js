@@ -1,6 +1,9 @@
 import {
     request, requestPostWithData
 } from "./request";
+import {
+    Loading
+} from "element-ui";
 
 const _CreateRecord = `${window.config.baseApiUrl}/record/add`;
 export const CreateRecord = obj => {
@@ -121,4 +124,23 @@ export const Dirs = {
     drought: 'drought'
 }
 
-
+export const TestNetwork = () => {
+    let load = Loading.service({fullscreen: true});
+    const timeout = 5000;
+    return new Promise((s,f) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => {
+            controller.abort();
+            f("");
+            load.close();
+        }, timeout);
+        return fetch(`${window.config.baseApiUrl}/system/user/test`, {
+            signal: controller.signal
+        }).then(o => {
+            clearTimeout(id);
+            s(o);
+            load.close();
+        }).catch(f);
+    })
+}
+window.TestNetwork = TestNetwork;

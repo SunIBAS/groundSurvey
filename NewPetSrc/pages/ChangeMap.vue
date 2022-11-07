@@ -1,13 +1,13 @@
 <template>
 	<div>
-	<div class="left-bottom" @click="openDialog()">
+	<div class="change-map-btn" @click="openDialog()">
 		<img src="./../assets/layer.png" alt="">
 	</div>
 	<el-dialog
 		ref="mapDialog"
 		:fullscreen="dialogFullscreen"
 		:custom-class="dialogTitleClass"
-		:title=$lang.get("更换底图")
+		:title='$lang.get("更换底图")'
 		:visible.sync="dialogBasemapVisible"
 		:width="dialogWidth">
 		<el-row :gutter="20">
@@ -114,10 +114,10 @@ export default {
 		cursor: pointer;
 	}
 
-	.left-bottom {
+	.change-map-btn {
 		position: fixed;
 		left: 10px;
-		bottom: 10px;
+		top: 10px;
 		width: 60px;
 		height: 60px;
 		background: white;
@@ -129,7 +129,7 @@ export default {
 		box-sizing: border-box;
 		background: rgba(0,0,0,0);
 	}
-	.left-bottom img {
+	.change-map-btn img {
 		width: 100%;
 		height: 100%;
 	}

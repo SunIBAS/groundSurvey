@@ -13,6 +13,8 @@
 			<img src="./../assets/locate.png" alt="">
 		</div>
 
+		<div class="left-top" @click="$refs.cmap.openDialog()"></div>
+
 		<div class="right-bottom" @click="openRecords">
 			<!--历史列表-->
 			<i class="el-icon-s-grid"></i>
@@ -24,7 +26,7 @@
 </template>
 
 <script>
-import ChangeMap from "./RecordList";
+import ChangeMap from "./ChangeMap";
 // import {createInvestRecord} from "../../src/api/selection";
 import {getPosition} from "../utils/getGeoLocation";
 import {addMarker} from "../../src/utils/mapAction";

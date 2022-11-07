@@ -4,30 +4,33 @@ export const MessageType = {
     position: 'position',
     db: 'db',
     dbinit: 'dbinit',
-    image: 'image'
+    image: 'image',
+    nativeUI: 'nativeUI',
+    map: 'map',
+    openDownloadDom: 'open_map_download'
 }
 
-let createId = (function () {
+window.createId = (function () {
     let timer = 0;
     return function () {
         timer++;
         return `${new Date().getTime()}#${timer}`;
     }
 })();
-let fnMap = {};
-let receiveFn = ({data}) => {
-    if (data.id in fnMap) {
-        fnMap[data.id] = data;
+window.fnMap = {};
+window.receiveFn = ({data}) => {
+    if (data.id in window.fnMap) {
+        window.fnMap[data.id] = data;
     }
 };
 
 window.addEventListener("message",data => {
-    receiveFn(data);
+    window.receiveFn(data);
 },false);
 
 export const Message = function (type,content) {
-    let id = createId();
-    fnMap[id] = null;
+    let id = window.createId();
+    window.fnMap[id] = null;
     return new Promise(s => {
         window.parent.postMessage({
             type,
@@ -35,14 +38,49 @@ export const Message = function (type,content) {
             id,
         },"*");
         let _id = setInterval(() => {
-            if (fnMap[id]) {
-                s(fnMap[id]);
+            if (window.fnMap[id]) {
+                s(window.fnMap[id]);
                 clearInterval(_id);
                 setTimeout(() => {
-                    delete fnMap[id];
+                    delete window.fnMap[id];
                 },500);
             }
         },500);
     })
 };
 
+window.getMapBase64 = url => {
+    let xyz = {};
+    url.split('?')[1].split('&').forEach(a => {
+        let aa = a.split('=');
+        xyz[aa[0]] = +aa[1];
+    });
+    // let {x,y,z} = xyz;
+    return Message(MessageType.map,xyz);
+}
+
+window.open_downloadDom = function () {
+    return Message(MessageType.openDownloadDom,"");
+}
+
+const NativeUI = {
+    toast(msg, option) {
+        Message(MessageType.nativeUI,{
+            name: 'toast',
+            param: {
+                option,
+                content: msg,
+            }
+        });
+    }
+}
+
+export const NUI = {
+    toast(msg, option) {
+        if (window.hbuilder) {
+            NativeUI.toast(msg,option);
+        } else {
+            alert(msg);
+        }
+    }
+}

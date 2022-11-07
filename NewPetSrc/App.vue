@@ -24,7 +24,7 @@ export default {
 		ifr.style.width = '100%';
 		ifr.style.height = '100%';
 		ifr.style.border = 'none';
-		ifr.src = './mapIframe.html';
+		ifr.src = `./mapIframe.html?hbuilder=${window.hbuilder}`;
 		setTimeout(() => {
 			this.$refs.ifr.appendChild(ifr);
 		},1000);

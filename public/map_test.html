@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./js/leaflet_1.7.1/leaflet.css">
+    <link rel="stylesheet" href="./css/leaflet-custrom.css">
+    <link rel="stylesheet" href="./js/leaflet-beautify-marker/leaflet-beautify-marker-icon.css">
+    <script src="./js/leaflet_1.7.1/leaflet.js"></script>
+
+    <style>
+        body {
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+</body>
+<script>
+    var TileBase64 = L.TileLayer.extend({
+        // @method createTile(coords: Object, done?: Function): HTMLElement
+        // Called only internally, overrides GridLayer's [`createTile()`](#gridlayer-createtile)
+        // to return an `<img>` HTML element with the appropriate image URL given `coords`. The `done`
+        // callback is called when the tile has been loaded.
+        createTile: function (coords, done) {
+            var tile = document.createElement('img');
+
+            // on(tile, 'load', bind(this._tileOnLoad, this, done, tile));
+            // on(tile, 'error', bind(this._tileOnError, this, done, tile));
+
+            if (this.options.crossOrigin || this.options.crossOrigin === '') {
+                tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
+            }
+
+            /*
+			 Alt tag is set to empty string to keep screen readers from reading URL and for compliance reasons
+			 http://www.w3.org/TR/WCAG20-TECHS/H67
+			*/
+            tile.alt = '';
+
+            /*
+			 Set role="presentation" to force screen readers to ignore this
+			 https://www.w3.org/TR/wai-aria/roles#textalternativecomputation
+			*/
+            tile.setAttribute('role', 'presentation');
+
+            // tile.src = this.getTileUrl(coords);
+
+            // re-start
+            let url = this.getTileUrl(coords);
+            let done1 = this._tileOnLoad.bind(this,done,tile)
+            let err1 = this._tileOnError.bind(this,done,tile)
+            fetch(url).then(_ => _.text()).then(src => {
+                tile.src = src;
+                // this._tileOnLoad(done,tile);
+                done1();
+            }).catch(() => {
+                err1();
+            })
+
+            return tile;
+        },
+    })
+    function tileBase64(url, options) {
+        return new TileBase64(url, options);
+    }
+
+    window.map_ = null;
+    window.onload = function () {
+        var bounds = new L.LatLngBounds(new L.LatLng(-90, -180), new L.LatLng(90, 180));
+        window.map_ = L.map("map",{
+            maxBounds: bounds,
+            maxBoundsViscosity: 0
+        })
+            .setView([100,100], 6);
+        // window.map_.setMinZoom(5);
+        window.map_.setMaxZoom(6);
+        // window.bmap = L.tileLayer('./test_map\\{z}\\{x}\\{y}.png', {
+        window.bmap = tileBase64('http://localhost:8088/?x={x}&y={y}&z={z}', {
+            zIndex: 1,
+        }).addTo(window.map_);
+    }
+</script>
+</html>

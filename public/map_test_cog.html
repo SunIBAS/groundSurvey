@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./js/leaflet_1.7.1/leaflet.css">
+    <link rel="stylesheet" href="./css/leaflet-custrom.css">
+    <link rel="stylesheet" href="./js/leaflet-beautify-marker/leaflet-beautify-marker-icon.css">
+    <script src="./js/leaflet_1.7.1/leaflet.js"></script>
+    <script src="./js/georaster.browser.bundle.min.js"></script>
+    <script src="./js/georaster-layer-for-leaflet.min.js"></script>
+
+    <style>
+        body {
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+</body>
+<script>
+    window.map_ = null;
+    window.onload = function () {
+        var bounds = new L.LatLngBounds(new L.LatLng(-90, -180), new L.LatLng(90, 180));
+        window.map_ = L.map("map",{
+            maxBounds: bounds,
+            maxBoundsViscosity: 0
+        })
+            .setView([100,100], 6);
+        // window.map_.setMinZoom(5);
+        window.map_.setMaxZoom(6);
+
+        var url_to_geotiff_file = "http://localhost:8080/groundSurvey/public/L5.cog.tif";
+        parseGeoraster(url_to_geotiff_file).then(function (georaster) {
+            console.log("georaster:", georaster);
+            const layer = new GeoRasterLayer({
+                debugLevel: 0,
+                georaster,
+                resolution: 512
+            });
+            layer.addTo(window.map_);
+        });
+    }
+</script>
+</html>

@@ -14,9 +14,17 @@ Vue.prototype.$addin = {
   $leafletAPI: null,
   hbuilder: false,
   offline: false,
+  module: {
+    type: 1, // 土地利用1，专题2
+    setType(type) {
+      this.type = type;
+      window.module = type;
+    }
+  }
 };
 window.hubilder = false;
 window.offline = false;
+window.module = 1;
 Vue.use(ElementUI);
 
 function initVue_() {

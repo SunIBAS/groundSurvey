@@ -6,7 +6,8 @@
 			 width: 100%;z-index: 1000;background: rgba(0,0,0,0.1);">
 			{{$lang.get('仅查看')}}
 		</div>
-		<div v-show="dialogVisible" style="position:fixed;bottom: 0px;z-index: 1;background: white;height: 70%;overflow-y: scroll;">
+		<div v-show="dialogVisible" ref="aopdMain"
+             style="position:fixed;bottom: 0px;z-index: 1;background: white;height: 70%;overflow-y: scroll;width: 100%;">
 			<div style="padding: 10px;font-size: 18px;font-weight: bold;position: fixed;z-index: 100;background: white;width: calc(100% - 20px);">
 				<span v-if="edit">{{$lang.get('填写信息')}}</span>
 				<span v-else>{{$lang.get('信息')}}</span>
@@ -15,8 +16,8 @@
 					&nbsp;&nbsp;&nbsp;&nbsp;
 					<span @click="deleteRecord()" >{{$lang.get('删除记录')}}</span>
 					&nbsp;&nbsp;&nbsp;&nbsp;
-					<span v-if="edit" @click="closeAndSave" style="float: right;font-weight: bold;font-size: 14px;color: #686868;">{{$lang.get('关闭并保存')}}</span>
-					<span v-else @click="closeAndSave(false)" >{{$lang.get('关闭')}}</span>
+<!--					<span v-if="edit" @click="closeAndSave" style="float: right;font-weight: bold;font-size: 14px;color: #686868;">{{$lang.get('关闭并保存')}}</span>-->
+<!--					<span v-else @click="closeAndSave(false)" >{{$lang.get('关闭')}}</span>-->
 				</span>
 			</div>
 			<el-form label-width="120px"
@@ -27,6 +28,21 @@
 						<el-col :span="8">{{formData.lat || 'null'}}</el-col>
 						<el-col :span="4">lng</el-col>
 						<el-col :span="8">{{formData.lng || 'null'}}</el-col>
+                        <el-col :span="24" v-show="edit">
+                            <el-button type="text" @click="$emit('toCurrentLocation')">
+                                <i class="el-icon-coordinate"></i>&nbsp;定位到当前位置&nbsp;&nbsp;&nbsp;Locate to current position
+                            </el-button>
+                        </el-col>
+                        <el-col :span="24" v-show="edit">
+                            <el-button type="text" @click="resizeLocation">
+                                <i class="el-icon-refresh-right"></i>&nbsp;恢复原本定位&nbsp;&nbsp;&nbsp;Reset the location (lat/lng)
+                            </el-button>
+                        </el-col>
+                        <el-col :span="24" v-show="edit">
+                            <el-button type="text" @click="manualLocation">
+                                <i class="el-icon-edit"></i>&nbsp;手动编辑定位&nbsp;&nbsp;&nbsp;Manual Editing location
+                            </el-button>
+                        </el-col>
 					</el-row>
 				</el-form-item>
 				<el-form-item :label="$lang.get('调查时间')">
@@ -73,7 +89,7 @@
 						</div>
 					</div>
 				</el-form-item>
-				<el-form-item :label="$lang.get('作物类型')">
+				<el-form-item :label="$lang.get('作物类型')" v-show="$addin.module.type === 2">
 					<el-select style="width: 100%;" :disabled="!edit" v-model="formData.cropType" clearable :placeholder="$lang.get('请选择')">
 						<el-option
 							v-for="item in cropTypes"
@@ -87,7 +103,7 @@
 <!--					<el-input v-model="formData.cropVariety" placeholder="作物品种"></el-input>-->
 <!--				</el-form-item>-->
 
-				<el-form-item>
+				<el-form-item v-show="$addin.module.type === 2">
 					<el-row :gutter="10">
 						<el-col :span="8">
 							<MyCard :title="$lang.get('病害信息')" :edit="edit"
@@ -110,9 +126,14 @@
 <!--					<el-button @click="drawerSetting.type = drawerTypes.drought;drawerSetting.visible = true;">干旱信息</el-button>-->
 				</el-form-item>
 
-<!--				<el-form-item>-->
-<!--					<el-button style="width: 100%" @click="updateRecord">提交</el-button>-->
-<!--				</el-form-item>-->
+				<el-form-item>
+					<el-button v-if="edit" @click="closeAndSave" style="width: 100%;" type="primary">
+                        {{ $lang.get('关闭并保存') }}
+                    </el-button>
+					<el-button v-else @click="closeAndSave(false)" style="width: 100%;" type="primary">
+                        {{ $lang.get('关闭') }}
+                    </el-button>
+				</el-form-item>
 			</el-form>
 		</div>
 
@@ -165,6 +186,7 @@ import {
 	UploadDiseaseImage,
 	UploadPestImage,
 	UploadImageFromLocal,
+    DeleteImage
 } from './../api/UpperApi';
 import {
 // 	// CreateRecord,
@@ -177,7 +199,7 @@ import {
 	formatLandMsg
 } from "../utils/formatLandMsg";
 import LandTypeSelection from "./LandTypeSelection";
-import {readFileAsDataURL} from "../utils/htmlUtils";
+import {inputLatlng, readFileAsDataURL} from "../utils/htmlUtils";
 import DpdForm from "./DpdForm";
 import MyCard from "./MyCard";
 import {
@@ -195,6 +217,23 @@ const UploadImageMethod = {
 	[drawerTypes.drought]: UploadDroughtImage,
 };
 let tmpObj = {};
+let _inputLatlng = null;
+let oldLatLng = {
+    reset: false,
+    lat: -1,
+    lng: -1,
+    setDefault({lat,lng}) {
+        lat = +(lat || '0');
+        lng = +(lng || '0');
+        if (!this.reset) {
+            if (lat && lng) {
+                this.lat = lat;
+                this.lng = lng;
+                this.reset = true;
+            }
+        }
+    }
+};
 
 export default {
 	name: "AddOnePointDetail",
@@ -299,9 +338,10 @@ export default {
 						message: this.$lang.get('删除成功!')
 					});
 					this.edit = false;
-					this.closeAndSave();
+					this.closeAndSave(true);
 				});
-			}).catch(() => {
+			}).catch(e => {
+                console.log(e);
 				this.$message({
 					type: 'info',
 					message: this.$lang.get('已取消删除')
@@ -326,6 +366,7 @@ export default {
 					this.formData.id = id;
 					this.formData.lng = obj.lng;
 					this.formData.lat = obj.lat;
+                    oldLatLng.setDefault(this.formData);
 					this.formData.cropType = obj.cropType;
 					this.formData.diseaseType = obj.diseaseType;
 					this.dpdForm[drawerTypes.disease][0].value = obj.diseaseType;
@@ -401,6 +442,7 @@ export default {
 		newForm({lat,lng,update,id}) {
 			this.formData['lat'] = (lat||0).toFixed(7);
 			this.formData['lng'] = (lng||0).toFixed(7);
+            oldLatLng.setDefault(this.formData);
 			if (!update) {
 				this.createRecord(id);
 				// this.formData['cropType'] = '';
@@ -428,16 +470,20 @@ export default {
 			// console.log(response, file, fileList)
 			debugger
 			return UploadImage(file,Dirs[type],offline).then((ret) => {
-				return UploadImageMethod[type](this.formData.id,ret,offline).then(() => {
+				return UploadImageMethod[type](this.formData.id,ret,offline).then(imageId => {
 					return readFileAsDataURL(file).then(url => {
 						return {
 							url: url,
 							file_path: ret,
+                            id: imageId,
 						}
 					});
 				});
 			});
 		},
+        deleteImage(type,imageId) {
+            return DeleteImage(type,imageId);
+        },
 		updateRecord(id) {
 			let obj = {
 				// "createTime": "2022-09-09T02:04:00.464Z",
@@ -470,18 +516,31 @@ export default {
 				return '';
 			});
 		},
-		closeAndSave() {
+		closeAndSave(deleteRecord) {
+            if (typeof deleteRecord !== 'boolean') {
+                deleteRecord = false;
+            }
+            oldLatLng.reset = false;
 			let updateOver = () => {
 				this.dialogVisible = false;
 				this.$parent.showForm = false;
 				this.$parent.removeMarker();
 				this.$parent.ifr.style.height = '100%';
+                this.$refs.aopdMain.scrollTop = 0;
 			}
-			if (!this.edit) {
+            if (deleteRecord) {
+                updateOver();
+                this.$emit('closeAOP','delete',this.formData.id);
+            } else if (!this.edit) {
+                this.$emit('closeAOP','');
 				updateOver();
 			} else {
 				this.updateRecord().then(() => {
 					updateOver();
+                    this.$emit('closeAOP','update',this.formData.id, {
+                        lat: this.formData.lat,
+                        lng: this.formData.lng,
+                    });
 				});
 			}
 		},
@@ -498,7 +557,21 @@ export default {
 					});
 				});
 			});
-		}
+		},
+        resizeLocation() {
+            this.formData['lat'] = +oldLatLng.lat;
+            this.formData['lng'] = +oldLatLng.lng;
+            this.$emit('newMarkerAndZoomTo',this.formData);
+            // todo
+        },
+        manualLocation() {
+            _inputLatlng(this.formData['lat'],this.formData['lng']).then(result => {
+                this.formData['lat'] = +result.lat;
+                this.formData['lng'] = +result.lng;
+                this.$emit('newMarkerAndZoomTo',this.formData);
+            });
+            // todo
+        }
 	},
 	watch: {
 		'drawerSetting.visible'() {
@@ -516,6 +589,7 @@ export default {
 		}
 	},
 	mounted() {
+        _inputLatlng = inputLatlng(this);
 		// todo ： 假装这里是双语
 		GetCropType().then(o => {
 			o.forEach(_o => {

@@ -87,6 +87,38 @@ export const runPromiseByArrReturnPromise = (promise,arr,doPromiseReturn) => {
     });
 };
 
+// 输入经纬度
+export const inputLatlng = function ($this) {
+    let inputOne = function (title,df) {
+        return $this.$prompt(title, '提示/Tip', {
+            inputValue: df,
+            confirmButtonText: '确定/Confirm',
+            cancelButtonText: '取消/Cancel',
+            inputPattern: /^[0-9.]+$/,
+            inputErrorMessage: '只能是数字/Number Only'
+        }).then(({ value }) => {
+            return parseFloat(value);
+        });
+    }
+    return function (defaultLat,defaultLng) {
+        let result = {
+            lng: -1,
+            lat: -1
+        };
+        return inputOne("Longitude/经度",defaultLng).then(lng => {
+            result.lng = lng;
+            return inputOne('Latitude/纬度',defaultLat).then(lat => {
+                result.lat = lat;
+                return result;
+            }).catch(() => {
+                return null;
+            });
+        }).catch(() => {
+            return null;
+        });
+    }
+}
+
 export {
     readFileAsDataURL
 }

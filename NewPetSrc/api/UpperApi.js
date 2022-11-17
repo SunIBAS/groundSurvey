@@ -68,6 +68,7 @@ export const GetRecord = id => {
 }
 // export const GetRecordList = _selectApi(PureApi.GetRecordList,NativeApi.GetRecordList);
 export const DeleteRecordById = id => {
+    id = id + '';
     if (id.indexOf('_') !== -1) {
         return NativeApi.DeleteRecordById(id);
     } else {
@@ -105,6 +106,16 @@ const UploadDDPImage = (pureApi,nativeApi) => {
 export const UploadDiseaseImage = UploadDDPImage(PureApi.UploadDiseaseImage,NativeApi.UploadDiseaseImage);
 export const UploadDroughtImage = UploadDDPImage(PureApi.UploadDroughtImage,NativeApi.UploadDroughtImage);
 export const UploadPestImage = UploadDDPImage(PureApi.UploadPestImage,NativeApi.UploadPestImage);
+
+export const DeleteImage = (type,id) => {
+    id = id + '';
+    if (id.indexOf('_') !== -1) {
+        // return NativeApi.DeleteRecordById(id);
+        // todo 删除本地图片
+    } else {
+        return PureApi.DeleteImage(type,id);
+    }
+}
 
 export const requestImage = url => {
     if (url.startsWith('img-db:')) {

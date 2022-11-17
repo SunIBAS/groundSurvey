@@ -1,6 +1,6 @@
 <template>
 	<div class="background">
-		<Setting></Setting>
+		<Setting ref="setting"></Setting>
 		<el-row :gutter="10">
 			<el-col :xs="1" :sm="3" :md="8" :lg="8" :xl="9">&nbsp;</el-col>
 			<el-col :xs="22" :sm="18" :md="8" :lg="8" :xl="6"

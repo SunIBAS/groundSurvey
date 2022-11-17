@@ -7,6 +7,7 @@ import {
 
 const _CreateRecord = `${window.config.baseApiUrl}/record/add`;
 export const CreateRecord = obj => {
+    obj["module"] = window.module;
     return request(_CreateRecord,{
         method: 'post',
         headers: {
@@ -17,6 +18,7 @@ export const CreateRecord = obj => {
 };
 const _UpdateRecord = `${window.config.baseApiUrl}/record/update`;
 export const UpdateRecord = obj => {
+    delete obj["module"]
     return request(_UpdateRecord,{
         method: 'put',
         headers: {
@@ -31,9 +33,42 @@ export const GetRecord = id => {
 };
 const _GetRecordList = `${window.config.baseApiUrl}/record/page-get`;
 export const GetRecordList = (pageNo,pageSize) => {
-    return request(`${_GetRecordList}?pageNo=${pageNo}&pageSize=${pageSize}`).then(data => {
+    let module = window.module;
+    return request(`${_GetRecordList}?pageNo=${pageNo}&pageSize=${pageSize}&module=${module}`).then(data => {
         return data;
     });
+}
+const _GetRecordListNotPage = `${window.config.baseApiUrl}/record/get/record/time`;
+export const GetRecordListNotPage = (timeFrom,timeTo) => {
+    let module = window.module;
+    return request(`${_GetRecordListNotPage}?startTime=${timeFrom}&endTime=${timeTo}&module=${module}`).then(data => {
+        return data;
+    });
+    // let obj = {
+    //     "success": true,
+    //     "code": 200,
+    //     "msg": "success",
+    //     "r": [timeFrom,timeTo],
+    //     "data": {
+    //         "total": 2,
+    //         "data": [
+    //             {
+    //                 "id": 76,
+    //                 "surveyTime": 1667964574947,
+    //                 "lat": 23.086715,
+    //                 "lng": 114.423523,
+    //             },
+    //             {
+    //                 "id": 75,
+    //                 "userId": 14,
+    //                 "surveyTime": 1667964569219,
+    //                 "lat": 23.031136,
+    //                 "lng": 114.388847,
+    //             }
+    //         ]
+    //     }
+    // };
+    // return new Promise(s => s(obj));
 }
 const _DeleteRecordById = `${window.config.baseApiUrl}/record/delete`;
 export const DeleteRecordById = id => request(`${_DeleteRecordById}?id=${id}`,{method: 'DELETE'});
@@ -49,12 +84,14 @@ const _LandType = `${window.config.baseApiUrl}/record/get/land/type`;
 const _LandAttribute = `${window.config.baseApiUrl}/record/get/land/attribute`;
 
 export const GetLandType = () => {
-    return request(_LandType,{}).then(data => {
+    let module = window.module;
+    return request(`${_LandType}?module=${module}`,{}).then(data => {
         return data;
     })
 };
 export const GetLandAttribute = (landTypeId) => {
-    return request(_LandAttribute + `?landTypeId=${landTypeId}`,{
+    let module = window.module;
+    return request(_LandAttribute + `?landTypeId=${landTypeId}&module=${module}`,{
         method: 'get',
     });
 };
@@ -99,6 +136,11 @@ export const UploadPestImage = (recordId,imageUrl) => {
         "imgUrl": imageUrl,
         "recordId": recordId,
     });
+}
+
+const _DeleteImage = `${window.config.baseApiUrl}/record/delete/{type}/img`
+export const DeleteImage = (type,imageId) => {
+    return request(_DeleteImage.replace('{type}',type) + '?id=' + imageId,{method: 'DELETE'});
 }
 
 const _Severity = `${window.config.baseApiUrl}/record/get/severity`

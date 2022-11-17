@@ -2,22 +2,32 @@
 	<div id="app">
 		<div id="mapdiv" ref="ifr">
 		</div>
-		<PageIndex v-if="ok" :ifr="$refs.ifr"></PageIndex>
+        <SelectModel v-if="step===1" @updateModule="updateModule"></SelectModel>
+		<PageIndex v-if="step===2" :ifr="$refs.ifr"></PageIndex>
 	</div>
 </template>
 
 <script>
 
 import PageIndex from "./pages/PageIndex";
+import SelectModel from "./SelectModel";
 let ifr = null;
 export default {
 	name: 'App',
-	components: {PageIndex},
+	components: {
+        SelectModel,
+        PageIndex
+    },
 	data() {
 		return {
-			ok: false
+            step: 0
 		}
 	},
+    methods: {
+        updateModule() {
+            this.step = 2
+        }
+    },
 	created() {
 		// <iframe :src="iframeUrl" style="flex: 1;border: none;" @load="iframeLoad"></iframe>
 		ifr = document.createElement('iframe');
@@ -36,7 +46,7 @@ export default {
 				clearInterval(id);
 				this.$set(this.$addin,'$map',ifr.contentWindow.map);
 				this.$set(this.$addin,'$leafletAPI',ifr.contentWindow.leafletAPI);
-				this.ok = true;
+				this.step = 1;
 			}
 		},500);
 		window.$this = this;
@@ -74,5 +84,8 @@ export default {
 
 .el-message-box {
 	max-width: 90%;
+}
+.el-message {
+    margin-top: 50px;
 }
 </style>

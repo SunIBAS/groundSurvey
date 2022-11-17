@@ -1,7 +1,7 @@
 <template>
 	<div :style="styles" :class="classes">
-		<el-button type="text" v-if="!url" @click="updateImage">{{$lang.get('查看图片')}}</el-button>
-		<img v-else :src="url" alt="" style="width: 100%;height: 100%;">
+		<el-button type="text" v-if="!base64 && !url" @click="updateImage">{{$lang.get('查看图片')}}</el-button>
+		<img v-else :src="base64 || url" alt="" style="width: 100%;height: 100%;">
 	</div>
 </template>
 
@@ -35,7 +35,13 @@ export default {
 			default() {
 				return ""
 			}
-		}
+		},
+        base64: {
+            type: String,
+            default() {
+                return ""
+            }
+        }
 	},
 	data() {
 		return {
@@ -47,6 +53,7 @@ export default {
 			if (this.src) {
 				requestImage(`${this.host}${this.src}`).then(url => {
 					this.url = url;
+                    this.$emit('updateImageBase64',url);
 				});
 			}
 		}

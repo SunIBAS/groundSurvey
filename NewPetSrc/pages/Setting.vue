@@ -16,11 +16,16 @@
 				<el-form-item label="离线地图 / Offline Map" v-show="$addin.hbuilder">
 					<el-button type="text" @click="openMapDownload">查看 / Show</el-button>
 				</el-form-item>
+                <el-form-item>
+                    <el-button type="text" @click="$refs.help.show = true;">帮助/Help</el-button>
+                </el-form-item>
 				<el-form-item v-show="login">
 					<el-button style="width: 100%;" @click="logout">退出登录 / Logout</el-button>
 				</el-form-item>
 			</el-form>
 		</el-dialog>
+
+        <Help ref="help"></Help>
 	</div>
 </template>
 
@@ -34,10 +39,12 @@ import {
 import {
 	logout
 } from "../api/UserApi";
+import Help from "./Help";
 
 export default {
 	name: "Setting",
-	data() {
+    components: {Help},
+    data() {
 		return {
 			dialogTableVisible: false,
 			systemLangOptions,

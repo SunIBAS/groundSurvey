@@ -36,14 +36,14 @@ module.exports = {
     },
     filenameHashing: true,
     devServer: {
-        host: '172.20.109.222',
+        host: '172.20.109.196',
         port: 8081,
         // https: true,
         open: true,
         proxy: {
             // detail: https://cli.vuejs.org/config/#devserver-proxy
             '/': {
-                target: `https://172.20.109.155:8080/`,
+                target: `https://172.20.109.222:8090/`,
                 // target: `http://localhost:801/`,
                 changeOrigin: true,
                 pathRewrite: {

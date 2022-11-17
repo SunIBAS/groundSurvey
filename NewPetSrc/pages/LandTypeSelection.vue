@@ -32,7 +32,7 @@
 						:key="oind" style="margin-right: 5px;margin-top: 5px;" @click="selectAttribute(formOpt,opt)"
 						:type="opt.id === landMsg.attributeValues[formOpt.landAttrId] ? 'success' : ''">{{opt[`value${lang}`]}}</el-tag>
 			</div>
-			<el-button @click="selectOver" style="width: 100%;">{{$lang.get('提交')}}</el-button>
+			<el-button style="margin-top: 10px;width: 100%;" @click="selectOver">{{$lang.get('保存选择')}}</el-button>
 		</div>
 	</el-dialog>
 </template>

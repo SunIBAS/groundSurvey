@@ -199,7 +199,7 @@ const leafletAPI = (function (){
             };
             let marker = L.marker(latlng, {
                 icon: L.BeautifyIcon.icon(options),
-                draggable: true
+                draggable: false
             });
             if (!noAddToMap) {
                 marker.addTo(map);
@@ -228,6 +228,12 @@ const leafletAPI = (function (){
         },
         removeLayer(obj) {
             map.removeLayer(obj);
+        },
+        flyTo(latlng) {
+            map.flyTo(latlng)
+        },
+        flyToBounds(bound) {
+            map.flyToBounds(bound);
         }
     }
 })();

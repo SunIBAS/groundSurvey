@@ -66,7 +66,7 @@ import {
 } from "./../api/nativeApi";
 import {
 	Ts2Sting
-} from "../../src/utils/time";
+} from "./../utils/time";
 
 let GetRecordList = PureGetRecordList;
 
@@ -116,7 +116,8 @@ export default {
 					});
 					this.refreshRecords();
 				});
-			}).catch(() => {
+			}).catch(e => {
+                console.log(e);
 				this.$message({
 					type: 'info',
 					message: this.$lang.get('已取消删除')

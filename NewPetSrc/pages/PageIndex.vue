@@ -1,7 +1,10 @@
 <template>
 	<div>
-		<AddOnePointDetail ref="aopd"></AddOnePointDetail>
-		<RecordList @loadMainRecordById="loadMainRecordById" ref="recordList"></RecordList>
+		<AddOnePointDetail ref="aopd"
+                           @toCurrentLocation="toCurrentLocation"
+                           @newMarkerAndZoomTo="newMarkerAndZoomTo"
+            @closeAOP="closeAOP"></AddOnePointDetail>
+<!--		<RecordList @loadMainRecordById="loadMainRecordById" ref="recordList"></RecordList>-->
 		<ChangeMap ref="cmap"></ChangeMap>
 		<div :class="marker_class" :style="marker_css" v-show="marker_click">
 			<el-button type="text" @click="addOnePointDetail()">{{$lang.get('创建记录')}}</el-button>
@@ -15,12 +18,20 @@
 
 		<div class="left-top" @click="$refs.cmap.openDialog()"></div>
 
-		<div class="right-bottom" @click="openRecords">
+		<div class="right-bottom" v-show="mode.current === mode.Mode.create">
 			<!--历史列表-->
-			<i class="el-icon-s-grid"></i>
+<!--            <i class="el-icon-s-claim"-->
+<!--               v-show="mode.current === mode.Mode.record"-->
+<!--               @click="openRecordListSetting()"></i>-->
+			<i class="el-icon-s-claim"
+               v-show="mode.current === mode.Mode.create"
+               @click="mode.current = mode.Mode.record"></i>
 		</div>
 
-		<Setting/>
+		<Setting ref="setting"/>
+
+        <RecordListSetting @loadMainRecordById="loadMainRecordById" :mode="mode.current"
+                @backToCreate="backToCreate" ref="recordListSetting"></RecordListSetting>
 
 	</div>
 </template>
@@ -29,15 +40,27 @@
 import ChangeMap from "./ChangeMap";
 // import {createInvestRecord} from "../../src/api/selection";
 import {getPosition} from "../utils/getGeoLocation";
-import {addMarker} from "../../src/utils/mapAction";
+import {addMarker} from "../utils/mapAction";
 import AddOnePointDetail from "./AddOnePointDetail";
-import RecordList from "./RecordList";
+// import RecordList from "./RecordList";
 import Setting from "./Setting";
+import RecordListSetting from "./RecordListSetting";
 let marker = null;
 let latlng = null;
+// 模式，新建调查点模式还是查看调查记录模式
+import { Mode } from "../utils/Fields";
+import {Storage} from "../utils/storage";
+// let Mode = {
+//     create: 'create',
+//     record: 'record',
+// }
+let tmpToCreate = false;
 export default {
 	name: "PageIndex",
-	components: {Setting, RecordList, AddOnePointDetail, ChangeMap},
+	components: {
+        RecordListSetting, Setting,
+        // RecordList,
+        AddOnePointDetail, ChangeMap},
 	props: {
 		ifr: {}
 	},
@@ -51,9 +74,22 @@ export default {
 				left: 'calc(50% - 100px)',
 			},
 			needToSetNewMarker: false,
+            mode: {
+                Mode: Mode,
+                current: Mode.create
+            }
 		};
 	},
 	methods: {
+        // type = ['delete','update']
+        // id = recordId
+        closeAOP(type,id,latlng) {
+            if (tmpToCreate) {
+                this.mode.current = Mode.record;
+                this.$refs.recordListSetting.backToRecord(type,id,latlng);
+                tmpToCreate = false;
+            }
+        },
 		openRecords() {
 			this.$refs.recordList.dialogVisible = true;
 			this.$nextTick(() => {
@@ -75,7 +111,8 @@ export default {
 		},
 		loadMainRecordById(id,edit,offline) {
 			this.needToSetNewMarker = true;
-			this.$refs.recordList.dialogVisible = false;
+			// this.$refs.recordList.dialogVisible = false;
+            this.$refs.recordListSetting.dialogTableVisible = false;
 			// this.addOnePointDetail(id);
 			this.$refs.aopd.offline = offline;
 			this.$refs.aopd.newForm({id: id || null});
@@ -113,22 +150,72 @@ export default {
 				}
 			}
 		},
+        newMarkerAndZoomTo({lat,lng}) {
+            let zoom = this.$addin.$leafletAPI.get_map().getZoom();
+            // zoom = zoom > 15 ? zoom : 15;
+            this.$addin.$leafletAPI.get_map().flyTo([lat,lng],zoom);
+            if (this.mode.current === Mode.create) {
+                this.addOnePoint('after',this.$addin.$leafletAPI.addMarker([lat,lng]), {lat,lng});
+            }
+        },
 		toCurrentLocation() {
 			this.removeMarker();
 			getPosition().then(p => {
 				console.log(p);
 				// this.$message(JSON.stringify(p));
-				let zoom = this.$addin.$leafletAPI.get_map().getZoom();
-				zoom = zoom > 15 ? zoom : 15;
-				this.$addin.$leafletAPI.get_map().flyTo([p.lat,p.lng],zoom);
-				this.addOnePoint('after',this.$addin.$leafletAPI.addMarker([p.lat,p.lng]),p);
+				// let zoom = this.$addin.$leafletAPI.get_map().getZoom();
+				// zoom = zoom > 15 ? zoom : 15;
+				// this.$addin.$leafletAPI.get_map().flyTo([p.lat,p.lng],zoom);
+                // if (this.mode.current === Mode.create) {
+                //     this.addOnePoint('after',this.$addin.$leafletAPI.addMarker([p.lat,p.lng]),p);
+                // }
+                this.newMarkerAndZoomTo(p);
 			}).catch(e => {
 				this.$message(e);
 			})
 		},
+        openRecordListSetting() {
+            this.$refs.recordListSetting.show();
+        },
+        // tmp = true 临时改变模式，返回后需要恢复
+        backToCreate(tmp) {
+            tmpToCreate = !!tmp;
+            this.mode.current = Mode.create;
+            this.$refs.recordListSetting.dialogTableVisible = false;
+        }
 	},
+    watch: {
+        'mode.current'() {
+            if (this.mode.current === Mode.create) {
+                // 创建记录模式
+            } else {
+                this.openRecordListSetting();
+                this.removeMarker();
+                // 查看历史记录模式
+            }
+        }
+    },
 	mounted() {
-		addMarker(this)(this.addOnePoint.bind(this));
+        // 这里绑定了地图的点击事件
+        // 'after',_marker,e.latlng
+		addMarker(this)((time,marker,latlng) => {
+            if (this.mode.current === Mode.create) {
+                this.addOnePoint(time,marker,latlng);
+            } else {
+                // 当前是历史记录模式
+                if (marker) {
+                    marker.remove();
+                    this.$refs.recordListSetting.removeMarkerSelected();
+                }
+            }
+        });
+
+        Storage.get_user_info().then(/*r*/() => {
+            // if (!r) {
+            this.$refs.setting.$refs.help.show = true;
+            Storage.set_first_use();
+            // }
+        })
 	}
 }
 </script>

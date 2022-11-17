@@ -56,6 +56,7 @@ const Storage = new (class  {
     constructor() {
         this.user_info_id = `_user_info_id_`;
         this.offline_user_token = '_offline_token_';
+        this.first_use = 'first_use';
         this._kv = {};
     }
 
@@ -88,6 +89,13 @@ const Storage = new (class  {
         return Storage_.setItem(key,JSON.stringify(value)).then(() => {
             this._kv[key] = value;
         });
+    }
+
+    check_first_use() {
+        return Storage_.getItem(this.first_use);
+    }
+    set_first_use() {
+        return Storage_.setItem(this.first_use,'true');
     }
 
     get_user_info() {

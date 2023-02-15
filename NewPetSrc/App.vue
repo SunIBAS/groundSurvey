@@ -2,6 +2,7 @@
 	<div id="app">
 		<div id="mapdiv" ref="ifr">
 		</div>
+        <AuthGeoLocation ref="AuthGeoLocation"></AuthGeoLocation>
         <SelectModel v-if="step===1" @updateModule="updateModule"></SelectModel>
 		<PageIndex v-if="step===2" :ifr="$refs.ifr"></PageIndex>
 	</div>
@@ -11,10 +12,12 @@
 
 import PageIndex from "./pages/PageIndex";
 import SelectModel from "./SelectModel";
+import AuthGeoLocation from "./pages/AuthGeoLocation.vue";
 let ifr = null;
 export default {
 	name: 'App',
 	components: {
+        AuthGeoLocation,
         SelectModel,
         PageIndex
     },
@@ -49,7 +52,11 @@ export default {
 				this.step = 1;
 			}
 		},500);
+        window.openAuthGeoLocationDrawer = () => {
+            this.$refs.AuthGeoLocation.drawer = true;
+        }
 		window.$this = this;
+    // alert(navigator.userAgent)
 	}
 }
 </script>

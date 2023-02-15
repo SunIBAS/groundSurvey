@@ -7,6 +7,8 @@ import EmptyApp from "./EmptyApp";
 // import EmptyApp from "../src/pages/PC/Records/SoilMoistureCollRecord";
 import {Lang} from "./utils/Lang";
 import { Message,MessageType } from "./utils/Message";
+import {checkHeight} from "./utils/checkHeight";
+import './utils/disableScale'
 
 // 定义 hbuilder 为 true 时可以离线操作，为 false 时无法离线操作，如果 hbuilder 为 true 则 请求缓存
 Vue.prototype.$addin = {
@@ -62,6 +64,7 @@ if (window !== window.parent) {
     }
   })
 } else {
+  window.maxHeight = checkHeight();
   window.hbuilder = false;
   initVue_();
 }

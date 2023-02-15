@@ -36,8 +36,8 @@ module.exports = {
     },
     filenameHashing: true,
     devServer: {
-        host: '172.20.109.196',
-        port: 8081,
+        // host: '172.20.109.196',
+        port: 8090,
         // https: true,
         open: true,
         proxy: {

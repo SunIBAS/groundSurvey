@@ -25,16 +25,55 @@
             padding: 0;
             overflow: hidden;
         }
-
+        .apple-debug {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: 20px;
+            height: 20px;
+            background: #3f51b5;
+            z-index: 100000000;
+        }
     </style>
 </head>
 <body>
 <noscript>
     <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
 </noscript>
+<div class="apple-debug"></div>
 <div id="app"></div>
 <!-- built files will be auto injected -->
 <script>
+    function reload_apple() {
+        function appendScript(src,suc) {
+            let sc1 = document.createElement('script');
+            sc1.src = src;
+            sc1.onload = suc;
+            document.body.append(sc1);
+        };
+        document.body.innerHTML = `<div class="apple-debug"></div><div id="app"></div>`;
+        // document.getElementsByClassName('background')[0].remove();
+        // let sc = document.getElementsByTagName('script');
+        // sc[sc.length - 1].remove();
+        // sc[sc.length - 1].remove();
+        appendScript(`js/chunk-vendors.js?${new Date().getTime()}`,() => {
+            appendScript(`js/index.js?${new Date().getTime()}`,()=>{
+                setReloadBtn();
+                alert('over');
+            })
+        });
+    }
+    function setReloadBtn() {
+        let ad = document.getElementsByClassName('apple-debug')[0];
+        if (location.hostname.includes('172.20.109')) {
+            ad.onclick = function () {
+                reload_apple();
+            }
+        } else {
+            ad.style.display = 'none';
+        }
+    };
+    window.onload = setReloadBtn;
 </script>
 </body>
 </html>

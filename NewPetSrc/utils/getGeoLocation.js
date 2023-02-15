@@ -4,6 +4,7 @@ import {
     MessageType,
     Message
 } from "./Message";
+import {checkAppleDevices} from "./checkHeight";
 
 const showError = msg => {
     Notification({
@@ -12,7 +13,16 @@ const showError = msg => {
         offset: 100,
     });
 }
-
+const tryAutoPermissionForLocation = function () {
+    return navigator.permissions.query({ name: 'geolocation' }).then(function(result) {
+        // Will return ['granted', 'prompt', 'denied']
+        const permission = result.state;
+        alert(JSON.stringify(result));
+        if ( permission === 'granted' || permission === 'prompt' ) {
+            return true;
+        }
+    });
+}
 const getPosition_native = function() {
     let loading = Loading.service({ fullscreen: true });
     return new Promise((s) => {
@@ -37,10 +47,17 @@ const getPosition_native = function() {
                 function (err) {
                     // info.innerHTML += "您的浏览器不支持此项技术"
                     showError(err.message)
-                    s({
-                        lat: -1,
-                        lng: -1
-                    })
+                    // s({
+                    //     lat: -1,
+                    //     lng: -1
+                    // })
+                    if (checkAppleDevices()) {
+                        window.openAuthGeoLocationDrawer();
+                        return true;
+                    } else {
+                        return tryAutoPermissionForLocation()/*.then(() => {
+                        }); */
+                    }
                 },
                 {timeout : 3000}
             )

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Title</title>
+</head>
+<body>
+</body>
+<script>
+    let colors = ['#00bcd4','#ff5722','#4caf50']
+    function createDiv(d) {
+        let div = document.createElement('div');
+        div.style.position = 'absolute';
+        div.style.top = '0px';
+        div.style.left = '0px';
+        div.style.height = `calc(100vh - ${d * 10}px)`;
+        div.style.width = `calc(100vw - ${d * 20}px)`;
+        div.innerText = d;
+        div.style.textAlign = 'right';
+        div.style.background = colors[d % colors.length];
+        div.style.color = 'white';
+        div.style.paddingTop = `${20 * (d % 3)}px`;
+        div.style.boxSizing = 'border-box'
+        document.body.append(div);
+    }
+    window.onload = function () {
+        let body = document.body;
+        for (let i = 0;i < 20;i++) {
+            createDiv(i);
+        }
+    }
+</script>
+</html>

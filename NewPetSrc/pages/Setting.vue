@@ -19,6 +19,10 @@
                 <el-form-item>
                     <el-button type="text" @click="$refs.help.show = true;">帮助/Help</el-button>
                 </el-form-item>
+                <el-form-item>
+                    <el-button type="text" @click="$refs.agl.drawer = true;">苹果设备定位/Apple Devices' Location</el-button>
+                    <AuthGeoLocation ref="agl"></AuthGeoLocation>
+                </el-form-item>
 				<el-form-item v-show="login">
 					<el-button style="width: 100%;" @click="logout">退出登录 / Logout</el-button>
 				</el-form-item>
@@ -40,10 +44,11 @@ import {
 	logout
 } from "../api/UserApi";
 import Help from "./Help";
+import AuthGeoLocation from "./AuthGeoLocation.vue";
 
 export default {
 	name: "Setting",
-    components: {Help},
+    components: {AuthGeoLocation, Help},
     data() {
 		return {
 			dialogTableVisible: false,
